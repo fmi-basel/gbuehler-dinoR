@@ -1,0 +1,21 @@
+Package: dinoR
+Title: Differential NOMe-seq analysis
+Version: 0.0.0.9000
+Authors@R: 
+    person("Michaela", "Schwaiger", , "michaela.schwaiger@fmi.ch", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Test for significant differences in NOME-seq footprints between 2 conditions, 
+    using genomic regions of interested centered around a landmark, 
+    for example a transcription factor motif.
+License: GPL-2
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Imports: 
+    tibble

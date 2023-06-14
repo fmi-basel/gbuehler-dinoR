@@ -1,0 +1,35 @@
+---
+title: "dinoR-vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{dinoR-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(dinoR)
+```
+
+#### load the NomeMatrix data for 2 replicates Adnp_KO and WT
+
+```{r}
+NomeMatrix <- readRDS(file = file.path("/tungstenfs/scratch/gbuehler/bioinfo/Rpackages/data_preparation/",
+                                       "Nome_matrix_GCHamp.rds"))
+```
+
+#### generate read counts for TF open nuc 
+
+```{r}
+patternQuant <- stateQuant(NomeMatrix,nr=10)
+```
+
+
+
