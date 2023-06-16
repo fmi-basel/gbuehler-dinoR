@@ -1,4 +1,4 @@
-#' @title stateQuant
+#' @title footprintQuant
 #'
 #' @description Count the number of reads in each NOMe state.
 #'
@@ -34,12 +34,12 @@
 #' names=rep(paste0("ROI",1:10),2),nFragsAnalyzed=rep(20,20),
 #' GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
 #' replace=TRUE),ncol=150,nrow=20)),20))
-#' stateQuant(NomeMatrix)
+#' footprintQuant(NomeMatrix)
 #'
 #' @importFrom tibble tibble
 #'
 #' @export
-stateQuant <- function(NomeMatrix,nr=2){
+footprintQuant <- function(NomeMatrix,nr=2){
   NomeMatrix <- NomeMatrix[NomeMatrix$nFragsAnalyzed > nr,] #select only amplicon/sample pairs with >nr reads
 
   amplicons <- unique(NomeMatrix$names)

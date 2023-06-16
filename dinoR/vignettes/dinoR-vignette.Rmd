@@ -1,5 +1,7 @@
 ---
-title: "dinoR-vignette"
+title: "Vignette for package dinoR"
+author: " Michaela Schwaiger"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{dinoR-vignette}
@@ -15,21 +17,74 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(dinoR)
+suppressPackageStartupMessages({
+  library(dinoR)
+  library(ggplot2)
+  library(dplyr)
+  })
 ```
 
 #### load the NomeMatrix data for 2 replicates Adnp_KO and WT
 
-```{r}
+```{r load data}
 NomeMatrix <- readRDS(file = file.path("/tungstenfs/scratch/gbuehler/bioinfo/Rpackages/data_preparation/",
                                        "Nome_matrix_GCHamp.rds"))
+NomeMatrix
 ```
 
 #### generate read counts for TF open nuc 
 
-```{r}
-patternQuant <- stateQuant(NomeMatrix,nr=10)
+```{r read counts}
+footprint_counts <- footprintQuant(NomeMatrix,nr=10)
+#remove any rows where no reads could be assigned a footprint
+footprint_counts <- footprint_counts[rowSums(footprint_counts[,3:7]) > 0,]
+footprint_counts
 ```
 
 
+#### calculate differential NOMe-seq footprint abundance between Adnp KO and WT 
+
+```{r diNOMe}
+res <- diNOMeTest(footprint_counts,WTsamples = c("WT_1","WT_2"),
+  KOsamples = c("AdnpKO_1","AdnpKO_2"))
+res
+```
+#### plot the number of regulated ROIs within each ROI type
+
+```{r nregulated, fig.height=4,fig.width=7}
+res$ampType <- matrix(unlist(strsplit(res$ROI,"_")),ncol=4,byrow=TRUE)[,1]
+
+res %>% group_by(contrasts,ampType,regulated) %>% summarize(n=n()) %>% 
+  ggplot(aes(x=ampType,y=n,fill=regulated)) + geom_bar(stat="identity") + 
+  facet_grid(~contrasts) + theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+  scale_fill_manual(values=c("orange","grey","blue3"))
+```
+
+#### MA plots
+
+```{r MAplot,fig.height=2,fig.width=10}
+ggplot(res,aes(y=logFC,x=logCPM,col=regulated)) + geom_point() + 
+  facet_grid(~contrasts) + theme_bw() + 
+  scale_color_manual(values=c("orange","grey","blue3"))
+```
+
+#### calculate the percentage of fragments in each footprint type and plot a heatmap comparing percentages in WT and KO
+
+```{r percentages,fig.height=5,fig.width=7}
+ROIgroup <-  matrix(unlist(strsplit(footprint_counts$ROI,"_")),ncol=4,byrow=TRUE)[,1]
+footprint_percentages <- footprintPerc(footprint_counts,ROIgroup)
+
+#plot heatmaps 
+fpPercHeatmap(footprint_percentages)
+```
+
+#### compare the footprint percentages and significance testing results for Adnp KO and WT 
+
+```{r comparison,fig.height=5,fig.width=9}
+
+compareFootprints(footprint_percentages,res,WTsamples = c("WT_1","WT_2"),
+                  KOsamples = c("AdnpKO_1","AdnpKO_2"),plotcols = c("#f03b20", "#a8ddb5", "#bdbdbd"))
+
+```
 

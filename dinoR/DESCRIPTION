@@ -18,4 +18,13 @@ Suggests:
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Imports: 
-    tibble
+    circlize,
+    ComplexHeatmap,
+    cowplot,
+    dplyr,
+    edgeR,
+    ggplot2,
+    rlang,
+    stats,
+    tibble,
+    tidyr
