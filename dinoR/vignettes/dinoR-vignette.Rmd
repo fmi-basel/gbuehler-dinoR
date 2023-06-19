@@ -32,6 +32,16 @@ NomeMatrix <- readRDS(file = file.path("/tungstenfs/scratch/gbuehler/bioinfo/Rpa
 NomeMatrix
 ```
 
+#### meta plots across ROIs with common TF motifs in the center
+
+```{r,fig.height=8,fig.width=10}
+avePlotData <- metaPlots(NomeMatrix=NomeMatrix,ROIgroup=matrix(unlist(strsplit(NomeMatrix$names,"_")),ncol=4,byrow=TRUE)[,1])
+
+ #plot average plots
+  ggplot(avePlotData, aes(x=position,y=protection)) + geom_point(alpha=0.5) + geom_line(aes(x=position,y=loess),col="darkblue",lwd=2) + 
+    theme_classic() + facet_grid(rows = vars(type),cols= vars(sample), scales = "free") + ylim(c(0,100)) + geom_hline(yintercept = c(10,20,30,40,50,60,70,80,90),alpha=0.5,color="grey",linetype="dashed")
+```
+
 #### generate read counts for TF open nuc 
 
 ```{r read counts}
