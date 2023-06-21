@@ -26,9 +26,10 @@ suppressPackageStartupMessages({
 
 #### load the NomeMatrix data for 2 replicates Adnp_KO and WT
 
+We use biscuit to map 300bp paired-end reads to the genome, umi_tools to remove duplicated UMIs, and the get_data_matrix_from_bams function from the nomeR package to get the protection from GCH methylation calls for each read pair (fragment) overlapping a region of interest (ROI). However, any tool that will result in GCH methylation protection calls can be used (for example QuasR), as long as the final output is in the format as shown below. Note that we use protection from methylation calls (0 = methylated, 1 = not methylated). 
+
 ```{r load data}
-NomeMatrix <- readRDS(file = file.path("/tungstenfs/scratch/gbuehler/bioinfo/Rpackages/data_preparation/",
-                                       "Nome_matrix_GCHamp.rds"))
+data(Nome_matrix, package = "dinoR")
 NomeMatrix
 ```
 
@@ -96,5 +97,8 @@ fpPercHeatmap(footprint_percentages)
 compareFootprints(footprint_percentages,res,WTsamples = c("WT_1","WT_2"),
                   KOsamples = c("AdnpKO_1","AdnpKO_2"),plotcols = c("#f03b20", "#a8ddb5", "#bdbdbd"))
 
+```
+```{r}
+sessionInfo()
 ```
 

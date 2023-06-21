@@ -31,7 +31,6 @@
 #' @importFrom stats complete.cases
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble tibble
-#' @importFrom rlang .data
 #' @importFrom edgeR DGEList
 #' @importFrom edgeR calcNormFactors
 #' @importFrom edgeR estimateDisp
@@ -75,8 +74,8 @@ diNOMeTest <- function(footprint_counts,WTsamples = c("WT_1","WT_2"),
   #re arrange pattern quantification matrix
   footprint_counts$all <- apply(footprint_counts[,3:7],1,sum)
   footprint_counts <- pivot_wider(footprint_counts,id_cols="ROI",
-                              names_from = .data$sample,values_from=c(.data$all,.data$TF,.data$open,
-                                                                      .data$Nuc,.data$upNuc,.data$downNuc))
+                              names_from = "sample",values_from=c("all","TF","open",
+                                                                      "Nuc","upNuc","downNuc"))
 
   #only keep ROIs where there were data in all samples
   footprint_counts <- footprint_counts[complete.cases(footprint_counts)==TRUE,]

@@ -43,7 +43,14 @@ footprintQuant <- function(NomeMatrix,nr=2){
   NomeMatrix <- NomeMatrix[NomeMatrix$nFragsAnalyzed > nr,] #select only amplicon/sample pairs with >nr reads
 
   amplicons <- unique(NomeMatrix$names)
+  if( length(amplicons) < 1){
+    stop("Please provide ROI name(s)!")
+  }
+
   all.samples2 <- unique(NomeMatrix$SampleName)
+  if( length(all.samples2) < 1){
+    stop("Please provide sample name(s)!")
+  }
 
   #empty vectors for pattenrs
   quant1 <- character(0)
@@ -60,13 +67,19 @@ footprintQuant <- function(NomeMatrix,nr=2){
   for(am in seq_along(amplicons)){
     am1 <- NomeMatrix[NomeMatrix$names ==amplicons[am],]
 
-    #extarct avalibale samples and order them by all.sampels
+    #extract available samples
     samples <- am1$SampleName
 
     #extract the list of 0/1 matrices
     peak1.list <- am1$GCH_DataMatrix
 
-    #add row.names indication sample and make a corresponding vector (groups) indication samples
+
+    #make sure there is a GCH matrix for every sample
+    if( length(samples) != length(peak1.list)){
+      stop(sprintf("Please provide a GCH protection matrix for every sample in ROI %s!",amplicons[am]))
+    }
+
+    #add row.names indicating sample and make a corresponding vector (groups) indicating samples
     groups <- character(0)
     readIDs <- character(0)
     for (i in seq_along(peak1.list)){
@@ -80,9 +93,14 @@ footprintQuant <- function(NomeMatrix,nr=2){
 
     #remove rows which have only NAs
     inx.row.NA <- which(rowMeans(gch_protect,na.rm=TRUE) != "NaN")
-    gch_protect <-gch_protect[inx.row.NA,]
+    gch_protect <- gch_protect[inx.row.NA,]
     groups <- groups[inx.row.NA]
     readIDs <- readIDs[inx.row.NA]
+
+    #inform about removed fragments
+    if(nrow(gch_protect) - length(inx.row.NA) > 0){
+            warning(sprintf("ROI %s: %d fragments contain no GCH protection information (out of %d total fragments)! \n", amplicons[am],nrow(gch_protect) - length(inx.row.NA),nrow(gch_protect)))
+    }
 
     #extract the samples that were actually used, after removing rows with all NA
     samples <- unique(groups)
@@ -95,9 +113,15 @@ footprintQuant <- function(NomeMatrix,nr=2){
       #find GpCs
       GCinx <- which(colMeans(gch_protect,na.rm=TRUE) != "NaN")
 
-      #for heatmap of all sites
+      #move it to a new object
       gch_protect2 <- gch_protect
-      #colnames(gch_protect2) <- -311:311
+
+      #check if we have at least 100 poistions available in GCH prection matrix to cover all windows
+      if(ncol(gch_protect2) < 100){
+        warning(sprintf("GCH protection matrix for ROI %s will not cover all windows! \n", amplicons[am]))
+      }
+
+      #label the columns with distance from center
       ColNumbers <- -floor((ncol(gch_protect2)/2)): floor((ncol(gch_protect2)/2))
       if (ncol(gch_protect2)%%2==0){
         colnames(gch_protect2) <- ColNumbers[-1]
@@ -106,11 +130,8 @@ footprintQuant <- function(NomeMatrix,nr=2){
       }
 
 
-      #----------------------------------------------------------------------------------------------------------------
-      #            quantify 3 states: TF, nucleosome, none as in https://www.sciencedirect.com/science/article/pii/S1097276520307930?via%3Dihub ####
-      #----------------------------------------------------------------------------------------------------------------
-      # quantify average methylation in 3 windows original: [-35:-25], [-7:7], [25:35]
-      #current: [-50:-25], [-8:8], [25:50]
+      #quantify 5 states: TF, open, nucleosome, uostream nucleosome, downstream nucleosome
+      # quantify average methylation in 3 windows: [-50:-25], [-8:8], [25:50]
 
       #make a vector for annotating the selected windows
       windows <- ifelse(as.numeric(colnames(gch_protect2)) < -50,"no window",
@@ -150,8 +171,6 @@ footprintQuant <- function(NomeMatrix,nr=2){
         inx <- which(groups == samples[i])
         gch_protect4 <- gch_protect2[inx,]
         pattern3 <- pattern[inx]
-        #score3 <- score[inx]
-
 
         #quantify patterns
         quant1 <- c(quant1,amplicons[am])

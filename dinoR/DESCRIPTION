@@ -3,7 +3,7 @@ Title: Differential NOMe-seq analysis
 Version: 0.0.0.9000
 Authors@R: 
     person("Michaela", "Schwaiger", , "michaela.schwaiger@fmi.ch", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           comment = c(ORCID = "0000-0002-4522-7810"))
 Description: Test for significant differences in NOME-seq footprints between 2 conditions, 
     using genomic regions of interested centered around a landmark, 
     for example a transcription factor motif.
@@ -24,8 +24,10 @@ Imports:
     dplyr,
     edgeR,
     ggplot2,
-    rlang,
     stats,
     tibble,
     tidyr,
     tidyselect
+Depends: 
+    R (>= 2.10)
+LazyData: true
