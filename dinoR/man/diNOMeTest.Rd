@@ -13,13 +13,13 @@ diNOMeTest(
 )
 }
 \arguments{
-\item{footprint_counts}{A tibble containing the sample names, ROI names,
-and number of fragments in each NOMe footprint pattern category. For example
-the output of the stateQuant function.}
+\item{footprint_counts}{A Summarized Experiment containing the sample names (colData), ROI names (rowData),
+and number of fragments in each NOMe footprint pattern category (assays). For example
+the output of the footprintQuant function.}
 
-\item{WTsamples}{The control sample names (two replicates) as they appear in footprint_quantifications.}
+\item{WTsamples}{The control sample names as they appear in footprint_quantifications.}
 
-\item{KOsamples}{The treatment sample names (two replicates) as they appear in footprint_quantifications.}
+\item{KOsamples}{The treatment sample names as they appear in footprint_quantifications.}
 
 \item{FDR}{The FDR cutoff for a ROI - footprint combination to be called regulated in the output.}
 
@@ -30,11 +30,11 @@ A tibble with the results of differential fragment count testing for each ROI-fo
 }
 \description{
 Tests for differential fragment counts for each NOMe
-footprint pattern compared to all patterns in 2 conditions.
+footprint pattern compared to all patterns in two conditions.
 }
 \details{
 Uses edgeR's quasi-likelihood methods to conveniently test for differential proportions of each
-one of 5 distinct footprints between 2 control and 2 treatment samples.
+one of 5 distinct footprints between at least two control and at least two treatment samples.
 }
 \examples{
 library(tibble)

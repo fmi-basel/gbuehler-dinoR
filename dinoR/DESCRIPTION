@@ -1,12 +1,20 @@
 Package: dinoR
 Title: Differential NOMe-seq analysis
-Version: 0.0.0.9000
+Version: 0.99.0
 Authors@R: 
     person("Michaela", "Schwaiger", , "michaela.schwaiger@fmi.ch", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-4522-7810"))
-Description: Test for significant differences in NOME-seq footprints between 2 conditions, 
+Description: dinoR can test for significant differences in NOME-seq
+    footprints between two conditions, 
     using genomic regions of interested centered around a landmark, 
-    for example a transcription factor motif.
+    for example a transcription factor motif. 
+    This package takes as input NOMe-seq  data in the form of a GCH protection matrix,
+    where every row is a fragment and every column a position relative to the region landmark.
+    dinoR can be used to group the fragments into 5 categories representing characteristic footprints,
+    plot the percentage of fragments in each category in a heatmap, or averaged across different ROI 
+    groups, for example, containing a common TF motif. It is especially designed
+    to compare footprints between two sample groups, using edgeR's quasi-likelihood methods on the total
+    fragment counts per ROI, sample, and footprint category, as well as the percentage of fragment counts.
 License: GPL-2
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -24,10 +32,20 @@ Imports:
     dplyr,
     edgeR,
     ggplot2,
+    rlang,
     stats,
+    SummarizedExperiment,
     tibble,
     tidyr,
     tidyselect
 Depends: 
-    R (>= 2.10)
+    R (>= 4.3.0)
 LazyData: true
+biocViews: 
+    NucleosomePositioning,
+    Epigenetics,
+    MethylSeq,
+    DifferentialMethylation,
+    Coverage,
+    Transcription,
+    Software

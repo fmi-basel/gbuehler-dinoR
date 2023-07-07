@@ -32,7 +32,7 @@ Compare each footprint pattern in WT and KO samples (percentages and diNOMeTest 
 }
 \details{
 Plots the percentages of reads in each ROI in WT versus KO samples (mean of two replicates) in each
-footprint pattern ("TF", "open", "upNuc", "Nuc", "downNuc"). The color indicates the ROI group and the shape the results of the diNOMeTest.
+footprint pattern ("tf", "open", "upNuc", "Nuc", "downNuc"). The color indicates the ROI group and the shape the results of the diNOMeTest.
 }
 \examples{
 library(tibble)

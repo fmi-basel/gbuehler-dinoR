@@ -16,44 +16,61 @@ knitr::opts_chunk$set(
 )
 ```
 
+#### load the necessary packages
+
 ```{r setup}
 suppressPackageStartupMessages({
   library(dinoR)
   library(ggplot2)
   library(dplyr)
+  library(SummarizedExperiment)
   })
 ```
 
-#### load the NomeMatrix data for 2 replicates Adnp_KO and WT
+### load the NomeMatrix data for 2 replicates Adnp_KO and WT
 
-We use biscuit to map 300bp paired-end reads to the genome, umi_tools to remove duplicated UMIs, and the get_data_matrix_from_bams function from the nomeR package to get the protection from GCH methylation calls for each read pair (fragment) overlapping a region of interest (ROI). However, any tool that will result in GCH methylation protection calls can be used (for example QuasR), as long as the final output is in the format as shown below. Note that we use protection from methylation calls (0 = methylated, 1 = not methylated). 
+We use biscuit to map 300bp paired-end reads to the genome, umi_tools to remove duplicated UMIs, and the get_data_matrix_from_bams function from the nomeR package (E. Ozonov, unpublished) to get the protection from GCH methylation calls for each read pair (fragment) overlapping a region of interest (ROI). However, any tool that will result in GCH methylation protection calls can be used (for example QuasR), as long as the final data structure is as shown below. Note that we use protection from methylation calls (0 = methylated, 1 = not methylated). 
 
 ```{r load data}
-data(Nome_matrix, package = "dinoR")
+data(NomeMatrix, package = "dinoR")
 NomeMatrix
 ```
 
-#### meta plots across ROIs with common TF motifs in the center
+### meta plots across ROIs with common TF motifs in the center
 
-```{r,fig.height=8,fig.width=10}
-avePlotData <- metaPlots(NomeMatrix=NomeMatrix,ROIgroup=matrix(unlist(strsplit(NomeMatrix$names,"_")),ncol=4,byrow=TRUE)[,1])
+We generate metaplots, grouping our ROIs into those that have  Rest, Ctcf, or Adnp motif sites in their center.
+We use 2 samples from WT mouse ES cells,a nd two samples from Adnp KO mouse ES cells.
 
- #plot average plots
-  ggplot(avePlotData, aes(x=position,y=protection)) + geom_point(alpha=0.5) + geom_line(aes(x=position,y=loess),col="darkblue",lwd=2) + 
-    theme_classic() + facet_grid(rows = vars(type),cols= vars(sample), scales = "free") + ylim(c(0,100)) + geom_hline(yintercept = c(10,20,30,40,50,60,70,80,90),alpha=0.5,color="grey",linetype="dashed")
+```{r,fig.height=6,fig.width=8}
+avePlotData <- metaPlots(NomeMatrix=NomeMatrix,ROIgroup=matrix(
+  unlist(strsplit(NomeMatrix$names,"_")),ncol=4,byrow=TRUE)[,1])
+
+#plot average plots
+ggplot(avePlotData, aes(x=position,y=protection)) + geom_point(alpha=0.5) + 
+    geom_line(aes(x=position,y=loess),col="darkblue",lwd=2) + 
+    theme_classic() + facet_grid(rows = vars(type),cols= vars(sample), scales = "free") +
+    ylim(c(0,100)) + geom_hline(yintercept = c(10,20,30,40,50,60,70,80,90),
+                                alpha=0.5,color="grey",linetype="dashed")
 ```
 
-#### generate read counts for TF open nuc 
+We can already see that while the NOMe footprints around Rest and Ctcf motifs don't change, there are clear differences around the Adnp motifs.
+
+To quantify these differences, we can now classify each fragment according to five types of footprints: transcription factor bound (TF), open chromatin, and nucleosome (we distinguish also upstream nucleosome (upNuc), downstream nucleosome (downNuc), and all other nucleosome (Nuc) footprints). To do this we use three windows (-50:-25, -8:8, 25:50) around the ROI center. Then we count the number of fragments in each sample-ROI combination supporting each footprint category. 
+
+### generate read counts for TF open nuc 
 
 ```{r read counts}
 footprint_counts <- footprintQuant(NomeMatrix,nr=10)
 #remove any rows where no reads could be assigned a footprint
-footprint_counts <- footprint_counts[rowSums(footprint_counts[,3:7]) > 0,]
+#footprint_counts <- footprint_counts[rowSums(footprint_counts[,3:7]) > 0,]
 footprint_counts
 ```
 
+Note that if a fragment does not have methylation protection data in all three windows needed for classification, the fragment will be counted as noData. 
 
-#### calculate differential NOMe-seq footprint abundance between Adnp KO and WT 
+Next we can test for differential abundance of footprints between Adnp KO and WT samples.
+
+### calculate differential NOMe-seq footprint abundance between Adnp KO and WT 
 
 ```{r diNOMe}
 res <- diNOMeTest(footprint_counts,WTsamples = c("WT_1","WT_2"),
@@ -72,6 +89,7 @@ res %>% group_by(contrasts,ampType,regulated) %>% summarize(n=n()) %>%
   scale_fill_manual(values=c("orange","grey","blue3"))
 ```
 
+
 #### MA plots
 
 ```{r MAplot,fig.height=2,fig.width=10}
@@ -80,24 +98,29 @@ ggplot(res,aes(y=logFC,x=logCPM,col=regulated)) + geom_point() +
   scale_color_manual(values=c("orange","grey","blue3"))
 ```
 
-#### calculate the percentage of fragments in each footprint type and plot a heatmap comparing percentages in WT and KO
+### calculate the percentage of fragments in each footprint type and plot a heatmap comparing percentages in WT and KO
 
 ```{r percentages,fig.height=5,fig.width=7}
-ROIgroup <-  matrix(unlist(strsplit(footprint_counts$ROI,"_")),ncol=4,byrow=TRUE)[,1]
+ROIgroup <-  matrix(unlist(strsplit(rowData(footprint_counts)$ROI,"_")),ncol=4,byrow=TRUE)[,1]
 footprint_percentages <- footprintPerc(footprint_counts,ROIgroup)
 
 #plot heatmaps 
 fpPercHeatmap(footprint_percentages)
 ```
 
-#### compare the footprint percentages and significance testing results for Adnp KO and WT 
+### compare the footprint percentages and significance testing results for KO and WT 
 
-```{r comparison,fig.height=5,fig.width=9}
+```{r comparison,fig.height=4,fig.width=8}
 
 compareFootprints(footprint_percentages,res,WTsamples = c("WT_1","WT_2"),
                   KOsamples = c("AdnpKO_1","AdnpKO_2"),plotcols = c("#f03b20", "#a8ddb5", "#bdbdbd"))
 
 ```
+
+We can see that in Adnp KO samples, transcription factor footprints significantly increase around Adnp motifs, while nucleosome footprints decrease. 
+
+#### Session information
+
 ```{r}
 sessionInfo()
 ```

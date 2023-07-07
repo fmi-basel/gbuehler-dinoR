@@ -10,9 +10,9 @@ footprintPerc(
 )
 }
 \arguments{
-\item{footprint_counts}{A tibble containing the sample names, ROI names,
-and number of fragments in each NOMe footprint pattern category. For example
-the output of the stateQuant function. Rows without any footprint counts should be removed.}
+\item{footprint_counts}{A Summarized Experiment containing the sample names (colData), ROI names (rowData),
+and number of fragments in each NOMe footprint pattern category (assays). For example
+the output of the footprintQuant function.}
 
 \item{ROIgroup}{A vector of the same length as the number of rows in footprint_counts,
 describing a group each ROI belongs too, for example,
@@ -31,11 +31,13 @@ and clusters the rows by similarity.
 }
 \examples{
 library(tibble)
-counts <- tibble(sample = c(rep("WT",10),rep("KO",10)), ROI=rep(paste0("ROI",1:10),2),
-TF=floor(runif(20,min=10,max=100)),open=floor(runif(20,min=10,max=100)),
-upNuc=floor(runif(20,min=10,max=100)),Nuc=floor(runif(20,min=10,max=100)),
-downNuc=floor(runif(20,min=10,max=100)))
-footprintPerc(counts)
+NomeMatrix <- tibble(SampleName = c(rep("WT_1",5),
+rep("WT_2",5),rep("KO_1",5),rep("KO_2",5)),
+names=rep(paste0("ROI",1:5),4),nFragsAnalyzed=rep(20,20),
+GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
+replace=TRUE),ncol=150,nrow=20)),20))
+footprint_counts <- footprintQuant(NomeMatrix)
+footprintPerc(footprint_counts)
 
 
 }

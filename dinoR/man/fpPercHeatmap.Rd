@@ -13,7 +13,8 @@ fpPercHeatmap(
 \item{footprint_percentages}{A tibble where each column corresponds to a sample-footprint percentage and each row to a ROI,
 with the rows clustered by similarity.}
 
-\item{plotcols}{A character vector of 5 colors to be used for the heatmaps of the 5 footprint patterns ("TF", "open", "upNuc", "Nuc", "downNuc").}
+\item{plotcols}{A character vector of 5 colors to be used for the heatmaps of the 5 footprint
+patterns ("tf", "open", "upNuc", "Nuc", "downNuc").}
 }
 \value{
 Heatmaps of the percentages of all reads in a ROI-sample combination in each footprint pattern.
@@ -23,12 +24,12 @@ Draws heatmaps of the percentages of all reads in a ROI-sample combination in ea
 }
 \details{
 Draws heatmaps of the percentages of all reads in a ROI-sample combination in each
-footprint pattern ("TF", "open", "upNuc", "Nuc", "downNuc"). The rows of the heatmaps are split by ROI group.
+footprint pattern ("tf", "open", "upNuc", "Nuc", "downNuc"). The rows of the heatmaps are split by ROI group.
 }
 \examples{
 library(tibble)
 counts <- tibble(sample = c(rep("WT",10),rep("KO",10)), ROI=rep(paste0("ROI",1:10),2),
-TF=floor(runif(20,min=10,max=100)),open=floor(runif(20,min=10,max=100)),
+tf=floor(runif(20,min=10,max=100)),open=floor(runif(20,min=10,max=100)),
 upNuc=floor(runif(20,min=10,max=100)),Nuc=floor(runif(20,min=10,max=100)),
 downNuc=floor(runif(20,min=10,max=100)))
 randPerc <- footprintPerc(counts)

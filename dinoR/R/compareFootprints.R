@@ -3,8 +3,7 @@
 #' @description Compare each footprint pattern in WT and KO samples (percentages and diNOMeTest results).
 #'
 #' @details Plots the percentages of reads in each ROI in WT versus KO samples (mean of two replicates) in each
-#' footprint pattern ("TF", "open", "upNuc", "Nuc", "downNuc"). The color indicates the ROI group and the shape the results of the diNOMeTest.
-#'
+#' footprint pattern ("tf", "open", "upNuc", "Nuc", "downNuc"). The color indicates the ROI group and the shape the results of the diNOMeTest.
 #'
 #' @param footprint_percentages A tibble where each column corresponds to a sample-footprint percentage and each row to a ROI,
 #'  with the rows clustered by similarity.
@@ -31,7 +30,8 @@
 #'
 #'
 #' @importFrom ggplot2 ggplot
-#' @importFrom ggplot2 aes_string
+#' @importFrom ggplot2 aes
+#' @importFrom rlang .data
 #' @importFrom ggplot2 geom_point
 #' @importFrom ggplot2 theme_classic
 #' @importFrom ggplot2 xlim
@@ -48,24 +48,27 @@ compareFootprints <- function(footprint_percentages, res, WTsamples = c("WT_1","
                               KOsamples = c("KO_1","KO_2"), plotcols){
 
 
-  patterns <- c("TF", "open", "upNuc", "Nuc", "downNuc")
+  patterns <- c("tf", "open", "upNuc", "Nuc", "downNuc")
 
   plotlist <- list()
   for (i in seq_along(patterns)){
-    #extract all columns with TF (or other pattern) starting
+    #extract all columns with tf (or other pattern) starting
     patternQuantPercSel <- footprint_percentages[,grep(paste0("^",patterns[i]), colnames(footprint_percentages))]
-    #remove TF_ to get sample names
+    #remove tf_ to get sample names
     colnames(patternQuantPercSel) <- gsub(paste0(patterns[i],"_"),"",colnames(patternQuantPercSel))
 
     #average samples based on WT and KO specifications
-    patternQuantPercSelAve <- data.frame(footprint_percentages[,1:2],WT=apply(patternQuantPercSel[,which(colnames(patternQuantPercSel) %in% WTsamples)],1,mean),
+    patternQuantPercSelAve <- data.frame(footprint_percentages[,1:2],
+                                         WT=apply(patternQuantPercSel[,which(colnames(patternQuantPercSel) %in% WTsamples)],1,mean),
                                          KO=apply(patternQuantPercSel[,which(colnames(patternQuantPercSel) %in% KOsamples)],1,mean))
 
-    # combine with TF_ contrast
+    # combine with tf_ contrast
     patternQuantPercSelAve <- left_join(patternQuantPercSelAve,res[res$contrasts==paste0(patterns[i],"_vs_all"),],by=c("ROI"="ROI"))
 
     #plot
-    plotlist[[i]] <-  ggplot(patternQuantPercSelAve,aes_string(x="WT",y="KO",col="ROIgroup",shape="regulated")) + geom_point() + theme_classic() + xlim(c(0,100)) + ylim(c(0,100)) + geom_abline(intercept=0,slope=1,linetype="dashed",col="grey",alpha=0.5) +
+    plotlist[[i]] <-  ggplot(patternQuantPercSelAve,aes(x=.data$WT,y=.data$KO,col=.data$ROIgroup,shape=.data$regulated)) +
+      geom_point() + theme_classic() + xlim(c(0,100)) + ylim(c(0,100))+
+      geom_abline(intercept=0,slope=1,linetype="dashed",col="grey",alpha=0.5) +
       scale_color_manual(values=plotcols) + scale_shape_manual(values=c("down"= 6,"no" = 0,"up" = 2)) + ggtitle(patterns[i])
   }
 

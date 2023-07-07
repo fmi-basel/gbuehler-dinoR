@@ -38,80 +38,71 @@
 #'
 #' @export
 metaPlots <- function(NomeMatrix,nr=2,nROI=2,ROIgroup=rep("motif1",nrow(NomeMatrix))){
-  NomeMatrix$type <- ROIgroup
-  NomeMatrix <- NomeMatrix[NomeMatrix$nFragsAnalyzed > nr,] #select only amplicon/sample pairs with >nr reads
+    NomeMatrix$type <- ROIgroup
+    NomeMatrix <- NomeMatrix[NomeMatrix$nFragsAnalyzed > nr,] #select only amplicon/sample pairs with >nr reads
 
-  amplicons <- unique(NomeMatrix$names)
-  all.samples2 <- unique(NomeMatrix$SampleName)
-  types <- unique(NomeMatrix$type)
+    amplicons <- unique(NomeMatrix$names)
+    all.samples2 <- unique(NomeMatrix$SampleName)
+    types <- unique(NomeMatrix$type)
 
-  perc.meth.list <- list()
+    perc.meth.list <- list()
 
-  #loop through samples
-  for (s in seq_along(all.samples2)){
-    #s=1
-    Nome_matrix.shifted2 <- NomeMatrix[NomeMatrix$SampleName==all.samples2[s],]
+    #loop through samples
+    for (s in seq_along(all.samples2)){
+        Nome_matrix.shifted2 <- NomeMatrix[NomeMatrix$SampleName==all.samples2[s],]
 
-    #loop through amplicon types
-    TypeAves <- matrix(nrow=length(types),ncol=ncol(Nome_matrix.shifted2$GCH_DataMatrix[[1]]))
-    TypeNs <- matrix(nrow=length(types),ncol=ncol(Nome_matrix.shifted2$GCH_DataMatrix[[1]]))
+        #loop through amplicon types
+        TypeAves <- matrix(nrow=length(types),ncol=ncol(Nome_matrix.shifted2$GCH_DataMatrix[[1]]))
+        TypeNs <- matrix(nrow=length(types),ncol=ncol(Nome_matrix.shifted2$GCH_DataMatrix[[1]]))
 
-    for (t in seq_along(types)){
-      #t=1
-      NomeList <- Nome_matrix.shifted2$GCH_DataMatrix[Nome_matrix.shifted2$type==types[t]]
-      #column means of all positions across reads per amplicon
-      ampliAves <- t(sapply(NomeList,colMeans,na.rm=TRUE))
-      #column means across amplicons for each position
-      TypeAves[t,] <- colMeans(ampliAves,na.rm=TRUE)*100
-      #number of amplicons with a 0/1 value (GpC) at each position
-      TypeNs[t,] <- apply(X = ampliAves,2,function(x){length(x[!is.na(x)])})
+        for (t in seq_along(types)){
+            NomeList <- Nome_matrix.shifted2$GCH_DataMatrix[Nome_matrix.shifted2$type==types[t]]
+            #column means of all positions across reads per amplicon
+            ampliAves <- t(vapply(NomeList,colMeans,rep(0,ncol(TypeAves)),na.rm=TRUE))
+            #column means across amplicons for each position
+            TypeAves[t,] <- colMeans(ampliAves,na.rm=TRUE)*100
+            #number of amplicons with a 0/1 value (GpC) at each position
+            TypeNs[t,] <- apply(X = ampliAves,2,function(x){length(x[!is.na(x)])})
+       }
 
+       #add names
+       TypeAves <- data.frame(t(TypeAves))
+       colnames(TypeAves) <- types
+
+       TypeNs <- data.frame(t(TypeNs))
+       colnames(TypeNs) <- types
+
+       # add position headeers
+       ColNumbers <- -floor((nrow(TypeAves)/2)): floor((nrow(TypeAves)/2))
+       if (nrow(TypeAves)%%2==0){
+           TypeAves$position <- ColNumbers[-1]
+          TypeNs$position <- ColNumbers[-1]
+       } else {
+           TypeAves$position <- ColNumbers
+           TypeNs$position <- ColNumbers
+       }
+
+       #remove %protection values with less than n GpCs
+       for (t in seq_along(types)){
+           TypeAves[TypeNs[,t] < nROI,t] <- NaN
+       }
+
+       #make long
+       perc.meth2 <- pivot_longer(TypeAves,cols=all_of(types),names_to="type",values_to = "protection")
+       perc.meth2 <- perc.meth2[is.na(perc.meth2$protection) ==FALSE,]
+
+       perc.meth <- data.frame()
+       for (g in seq_along(unique(perc.meth2$type))){
+           perc.meth3 <- perc.meth2[perc.meth2$type==unique(perc.meth2$type)[g],]
+          perc.meth3$loess <- loess(perc.meth3$protection ~ perc.meth3$position,span=0.05)$fitted
+          perc.meth=rbind(perc.meth,perc.meth3)
+       }
+
+       #save the methylation profiles to a table
+       perc.meth$sample <- all.samples2[s]
+       perc.meth.list[[s]] <- perc.meth
     }
 
-    #add names
-    TypeAves <- data.frame(t(TypeAves))
-    colnames(TypeAves) <- types
-
-    TypeNs <- data.frame(t(TypeNs))
-    colnames(TypeNs) <- types
-
-    # add position headeers
-    ColNumbers <- -floor((nrow(TypeAves)/2)): floor((nrow(TypeAves)/2))
-    if (nrow(TypeAves)%%2==0){
-      TypeAves$position <- ColNumbers[-1]
-      TypeNs$position <- ColNumbers[-1]
-    } else {
-      TypeAves$position <- ColNumbers
-      TypeNs$position <- ColNumbers
-    }
-
-
-    #remove %protection values with less than n GpCs
-    for (t in seq_along(types)){
-      TypeAves[TypeNs[,t] < nROI,t] <- NaN
-    }
-
-
-    #make long
-    perc.meth2 <- pivot_longer(TypeAves,cols=all_of(types),names_to="type",values_to = "protection")
-    perc.meth2 <- perc.meth2[is.na(perc.meth2$protection) ==FALSE,]
-
-
-    perc.meth <- data.frame()
-    for (g in seq_along(unique(perc.meth2$type))){
-      perc.meth3 <- perc.meth2[perc.meth2$type==unique(perc.meth2$type)[g],]
-      perc.meth3$loess <- loess(perc.meth3$protection ~ perc.meth3$position,span=0.05)$fitted
-      perc.meth=rbind(perc.meth,perc.meth3)
-    }
-
-    #save the methylation profiles to a table
-    perc.meth$sample <- all.samples2[s]
-    perc.meth.list[[s]] <- perc.meth
-    perc.meth.list[[s]]$ID <- paste(perc.meth.list[[s]]$type,perc.meth.list[[s]]$position,sep="_")
-
-  }
-
-  perc.meth <- tibble(do.call("rbind",perc.meth.list))
-  return(perc.meth)
-
+    perc.meth <- tibble(do.call("rbind",perc.meth.list))
+    return(perc.meth)
 }

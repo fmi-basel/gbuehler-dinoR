@@ -20,8 +20,9 @@ correspond to genomic positions from start to end of the ROI and the rows to fra
 (\code{nr}) fragments analyzed (nFragsAnalyzed column).}
 }
 \value{
-A tibble with a row for each sample - ROI combination, and the number of fragments in each footprint category.
-TF = transcription factor footprint
+A SummarizedExperiment for the number of fragments in each footprint category,
+with an assay for each pattern (see below), a column for each sample, and a row for each ROI.
+tf = transcription factor footprint
 open = open chromatin footprint
 upNuc = upstream nucleosome footprint
 downNuc = downstream nucleosome footprint
@@ -35,7 +36,7 @@ Count the number of reads in each NOMe state.
 Selects 3 windows (-50:-25, -8:8, 25:50) around the center of the provided region of interest (ROI) and calculates the average GpC
 methylation protection for a given fragment across all GpCs in each window.
 If it is above 0.5 the window is deemed protected, below 0.5, unprotected Depending on the protection pattern
-in all windows, a read is put into one of 5 footprint categories: TF bound (0 - 1 - 0), open chromatin (0 - 0 - 0),
+in all windows, a read is put into one of 5 footprint categories: tf bound (0 - 1 - 0), open chromatin (0 - 0 - 0),
 upstream nucleosome (1 - 1 - 0), other nucleosome (1 - 1 - 1, 1 - 0 - 0, 0 - 0 - 1, 1 - 0 - 1), and downstream nucleosome (0 - 1 - 1).
 }
 \examples{
