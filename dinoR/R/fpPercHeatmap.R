@@ -14,12 +14,14 @@
 #'
 #' @examples
 #' library(tibble)
-#' counts <- tibble(sample = c(rep("WT",10),rep("KO",10)), ROI=rep(paste0("ROI",1:10),2),
-#' tf=floor(runif(20,min=10,max=100)),open=floor(runif(20,min=10,max=100)),
-#' upNuc=floor(runif(20,min=10,max=100)),Nuc=floor(runif(20,min=10,max=100)),
-#' downNuc=floor(runif(20,min=10,max=100)))
-#' randPerc <- footprintPerc(counts)
-#' fpPercHeatmap(randPerc)
+#' NomeMatrix <- tibble(SampleName = c(rep("WT_1",5),
+#' rep("WT_2",5),rep("KO_1",5),rep("KO_2",5)),
+#' names=rep(paste0("ROI",1:5),4),nFragsAnalyzed=rep(20,20),
+#' GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
+#' replace=TRUE),ncol=150,nrow=20)),20))
+#' footprint_counts <- footprintQuant(NomeMatrix)
+#' fp <- footprintPerc(footprint_counts)
+#' fpPercHeatmap(fp)
 #'
 #'
 #' @importFrom ComplexHeatmap Heatmap
@@ -32,7 +34,7 @@ fpPercHeatmap <- function(footprint_percentages,
 
     patterns <- c("tf", "open", "upNuc", "Nuc", "downNuc")
     #initialize empty heatmap list
-    ht_list = NULL
+    ht_list <- NULL
     #draw heatmaps
     for (i in seq_along(patterns)){
 

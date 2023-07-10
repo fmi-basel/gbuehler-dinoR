@@ -82,7 +82,7 @@ footprintQuant <- function(NomeMatrix,nr=2){
         readIDs <- character(0)
         for (i in seq_along(peak1.list)){
             readIDs <- c(readIDs,row.names(peak1.list[[i]]))
-            row.names(peak1.list[[i]]) <- paste(samples[i],1:nrow(peak1.list[[i]]),sep="_")
+            row.names(peak1.list[[i]]) <- paste(samples[i],seq(1,nrow(peak1.list[[i]])),sep="_")
             groups <- c(groups,rep(samples[i],nrow(peak1.list[[i]])))
         }
 

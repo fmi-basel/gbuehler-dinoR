@@ -61,7 +61,7 @@ diNOMeTest <- function(footprint_counts,WTsamples=c("WT_1","WT_2"),
 
   #model
   annots <- data.frame(cond= c(rep("WT",6*nrepWT),rep("KO",6*nrepKO)),
-                     rep= rep(paste0("r",1:nreps),each=6),
+                     rep= rep(paste0("r",seq(1,nreps)),each=6),
                      type= c(rep(c("all","tf","open","Nuc","upNuc","downNuc"),nreps)))
 
   dm <- model.matrix(~ rep,data=annots)

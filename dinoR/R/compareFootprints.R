@@ -27,8 +27,6 @@
 #' footprint_percentages <- footprintPerc(footprint_counts)
 #' compareFootprints(footprint_percentages,res,plotcols="black")
 #'
-#'
-#'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
 #' @importFrom rlang .data
@@ -58,7 +56,7 @@ compareFootprints <- function(footprint_percentages, res, WTsamples = c("WT_1","
     colnames(patternQuantPercSel) <- gsub(paste0(patterns[i],"_"),"",colnames(patternQuantPercSel))
 
     #average samples based on WT and KO specifications
-    patternQuantPercSelAve <- data.frame(footprint_percentages[,1:2],
+    patternQuantPercSelAve <- data.frame(footprint_percentages[,seq(1,2)],
                                          WT=apply(patternQuantPercSel[,which(colnames(patternQuantPercSel) %in% WTsamples)],1,mean),
                                          KO=apply(patternQuantPercSel[,which(colnames(patternQuantPercSel) %in% KOsamples)],1,mean))
 

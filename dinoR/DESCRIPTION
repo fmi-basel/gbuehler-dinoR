@@ -15,7 +15,7 @@ Description: dinoR can test for significant differences in NOME-seq
     groups, for example, containing a common TF motif. It is especially designed
     to compare footprints between two sample groups, using edgeR's quasi-likelihood methods on the total
     fragment counts per ROI, sample, and footprint category, as well as the percentage of fragment counts.
-License: GPL-2
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
@@ -40,7 +40,7 @@ Imports:
     tidyselect
 Depends: 
     R (>= 4.3.0)
-LazyData: true
+LazyData: false
 biocViews: 
     NucleosomePositioning,
     Epigenetics,

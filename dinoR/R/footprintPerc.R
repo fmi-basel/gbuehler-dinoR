@@ -68,7 +68,7 @@ footprintPerc <- function(footprint_counts,
   dist.tf <- dist(patternQuantPercWide[,3:ncol(patternQuantPercWide)], method="euclidean")
   #in case there are NAs in the dissimilarity object, replace them with the mean distance
   # to prevent clustering from failing
-  dist.tf_mean <- mean(dist.tf, na.rm=T)
+  dist.tf_mean <- mean(dist.tf, na.rm=TRUE)
   dist.tf[is.na(dist.tf)] <- dist.tf_mean
   clust.tf <- hclust(dist.tf, method="ward.D2")
   #sort the whole data.frame  based on clustering

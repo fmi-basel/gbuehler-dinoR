@@ -47,6 +47,4 @@ KOsamples = c("KO_1","KO_2"))
 footprint_percentages <- footprintPerc(footprint_counts)
 compareFootprints(footprint_percentages,res,plotcols="black")
 
-
-
 }

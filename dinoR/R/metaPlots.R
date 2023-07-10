@@ -8,17 +8,18 @@
 #' which should contain the following columns:
 #' nFragsAnalyzed = the number fragments (read pairs) that was available
 #' names = the names of the ROIs that were analyzed
-#' SampleName = the names of the samples that were analzyed
+#' SampleName = the names of the samples that were analyzed
 #' GCH_DataMatrix = for every combination of ROI and sample, a matrix where the columns
 #' correspond to genomic positions from start to end of the ROI and the rows to fragments.
 #' 1 = protected from GpC methylation. 0 = not protected from GpC methylation.
 #' @param nr Integer used as a cutoff to filter sample ROI combinations that have less than
 #' (\code{nr}) fragments analyzed (nFragsAnalyzed column).
-#' @param nROI The number of ROIs that need to have a GpC methylation measuremnet at a given
+#' @param nROI The number of ROIs that need to have a GpC methylation measurement at a given
 #' position for this position to be included in the plot.
 #' @param ROIgroup A vector of the same length as the number of rows in NomeMatrix,
 #' describing a group each ROI belongs too, for example,
 #' different transcription factor motifs at the center of the ROI.
+#' @param span The span option to be used for the loess function (to draw a line through the datapoints).
 #'
 #' @return A tibble with the methylation protection profiles summarized across all ROIs in a certain group.
 #'
@@ -37,7 +38,7 @@
 #' @importFrom stats loess
 #'
 #' @export
-metaPlots <- function(NomeMatrix,nr=2,nROI=2,ROIgroup=rep("motif1",nrow(NomeMatrix))){
+metaPlots <- function(NomeMatrix,nr=2,nROI=2,ROIgroup=rep("motif1",nrow(NomeMatrix)),span=0.05){
     NomeMatrix$type <- ROIgroup
     NomeMatrix <- NomeMatrix[NomeMatrix$nFragsAnalyzed > nr,] #select only amplicon/sample pairs with >nr reads
 
@@ -94,8 +95,8 @@ metaPlots <- function(NomeMatrix,nr=2,nROI=2,ROIgroup=rep("motif1",nrow(NomeMatr
        perc.meth <- data.frame()
        for (g in seq_along(unique(perc.meth2$type))){
            perc.meth3 <- perc.meth2[perc.meth2$type==unique(perc.meth2$type)[g],]
-          perc.meth3$loess <- loess(perc.meth3$protection ~ perc.meth3$position,span=0.05)$fitted
-          perc.meth=rbind(perc.meth,perc.meth3)
+          perc.meth3$loess <- loess(perc.meth3$protection ~ perc.meth3$position,span=span)$fitted
+          perc.meth <- rbind(perc.meth,perc.meth3)
        }
 
        #save the methylation profiles to a table
