@@ -1,5 +1,5 @@
 ---
-title: "Vignette for package dinoR"
+title: "dinoR-vignette"
 author: " Michaela Schwaiger"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette

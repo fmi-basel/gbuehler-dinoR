@@ -95,12 +95,6 @@ footprintQuant <- function(NomeMatrix,nr=2){
         groups <- groups[inx.row.NA]
         readIDs <- readIDs[inx.row.NA]
 
-        #inform about removed fragments
-        if(nrow(gch_protect) - length(inx.row.NA) > 0){
-            warning(sprintf("ROI %s: %d fragments contain no GCH protection information (out of %d total fragments) \n",
-                            amplicons[am],nrow(gch_protect) - length(inx.row.NA),nrow(gch_protect)))
-        }
-
         #extract the samples that were actually used, after removing rows with all NA
         samples <- unique(groups)
 
@@ -115,7 +109,7 @@ footprintQuant <- function(NomeMatrix,nr=2){
             #move it to a new object
             gch_protect2 <- gch_protect
 
-            #check if we have at least 100 poistions available in GCH prection matrix to cover all windows
+            #check if we have at least 100 postions available in GCH prection matrix to cover all windows
             if(ncol(gch_protect2) < 100){
                 warning(sprintf("GCH protection matrix for ROI %s will not cover all windows \n", amplicons[am]))
             }
@@ -188,7 +182,9 @@ footprintQuant <- function(NomeMatrix,nr=2){
     pattern_quant <- data.frame(sample=quant2,ROI=quant1,tf=quant3,open=quant4,upNuc=quant7,Nuc=quant5,downNuc=quant8,noData=quant6)
     pattern_quant$all <- apply(pattern_quant[,3:7],1,sum)
     all_patterns <- colnames(pattern_quant)[3:9]
-    pattern_quant_wide <- pivot_wider(pattern_quant,id_cols="ROI",names_from="sample",values_from=c("tf","open","upNuc","Nuc","downNuc","noData","all"),names_sort=TRUE)
+    pattern_quant_wide <- pivot_wider(pattern_quant,id_cols="ROI",names_from="sample",
+                                      values_from=c("tf","open","upNuc","Nuc","downNuc","noData","all"),
+                                      names_sort=TRUE,values_fill = 0)
 
     #....generate assay matrices for each pattern
     countsList <- list()
