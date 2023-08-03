@@ -40,7 +40,7 @@ Imports:
     tidyselect
 Depends: 
     R (>= 4.3.0)
-LazyData: true
+LazyData: false
 biocViews: 
     NucleosomePositioning,
     Epigenetics,

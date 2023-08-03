@@ -4,7 +4,13 @@
 \alias{footprintQuant}
 \title{footprintQuant}
 \usage{
-footprintQuant(NomeMatrix, nr = 2)
+footprintQuant(
+  NomeMatrix,
+  nr = 2,
+  window_1 = c(-50, -25),
+  window_2 = c(-8, 8),
+  window_3 = c(25, 50)
+)
 }
 \arguments{
 \item{NomeMatrix}{A tibble where each row corresponds to a sample ROI combination,
@@ -18,6 +24,15 @@ correspond to genomic positions from start to end of the ROI and the rows to fra
 
 \item{nr}{Integer used as a cutoff to filter sample ROI combinations that have less than
 (\code{nr}) fragments analyzed (nFragsAnalyzed column).}
+
+\item{window_1}{Integer vector with two elements representing start and end positions
+of the first window relative to the ROI center.}
+
+\item{window_2}{Integer vector with two elements representing start and end positions
+of the second window relative to the ROI center.}
+
+\item{window_3}{Integer vector with two elements representing start and end positions
+of the third window relative to the ROI center.}
 }
 \value{
 A SummarizedExperiment for the number of fragments in each footprint category,

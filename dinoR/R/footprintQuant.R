@@ -18,6 +18,12 @@
 #' 1 = protected from GpC methylation. 0 = not protected from GpC methylation.
 #' @param nr Integer used as a cutoff to filter sample ROI combinations that have less than
 #' (\code{nr}) fragments analyzed (nFragsAnalyzed column).
+#' @param window_1 Integer vector with two elements representing start and end positions
+#' of the first window relative to the ROI center.
+#' @param window_2 Integer vector with two elements representing start and end positions
+#' of the second window relative to the ROI center.
+#' @param window_3 Integer vector with two elements representing start and end positions
+#' of the third window relative to the ROI center.
 #'
 #' @return A SummarizedExperiment for the number of fragments in each footprint category,
 #' with an assay for each pattern (see below), a column for each sample, and a row for each ROI.
@@ -40,7 +46,7 @@
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #'
 #' @export
-footprintQuant <- function(NomeMatrix,nr=2){
+footprintQuant <- function(NomeMatrix,nr=2,window_1=c(-50,-25),window_2=c(-8,8),window_3=c(25,50)){
     NomeMatrix <- NomeMatrix[NomeMatrix$nFragsAnalyzed > nr,] #select only amplicon/sample pairs with >nr reads
 
     amplicons <- unique(NomeMatrix$names)
@@ -123,20 +129,20 @@ footprintQuant <- function(NomeMatrix,nr=2){
             }
 
             #quantify 5 states: tf, open, nucleosome, uostream nucleosome, downstream nucleosome
-            # quantify average methylation in 3 windows: [-50:-25], [-8:8], [25:50]
+            # quantify average methylation in 3 windows: default is [-50:-25], [-8:8], [25:50]
 
             #make a vector for annotating the selected windows
-            windows <- ifelse(as.numeric(colnames(gch_protect2)) < -50,"no window",
-                        ifelse(as.numeric(colnames(gch_protect2)) >= -50 &
-                                 as.numeric(colnames(gch_protect2)) < -25,"window1",
-                               ifelse(as.numeric(colnames(gch_protect2)) >= -25 &
-                                        as.numeric(colnames(gch_protect2)) < -8,"no window",
-                                      ifelse(as.numeric(colnames(gch_protect2)) >= -8 &
-                                               as.numeric(colnames(gch_protect2)) <= 8, "window2",
-                                             ifelse(as.numeric(colnames(gch_protect2)) > 8 &
-                                                      as.numeric(colnames(gch_protect2)) <= 25, "no window",
-                                                    ifelse(as.numeric(colnames(gch_protect2)) > 25 &
-                                                             as.numeric(colnames(gch_protect2)) <= 50, "window3",
+            windows <- ifelse(as.numeric(colnames(gch_protect2)) < window_1[1],"no window",
+                        ifelse(as.numeric(colnames(gch_protect2)) >= window_1[1] &
+                                 as.numeric(colnames(gch_protect2)) < window_1[2],"window1",
+                               ifelse(as.numeric(colnames(gch_protect2)) >= window_1[2] &
+                                        as.numeric(colnames(gch_protect2)) < window_2[1],"no window",
+                                      ifelse(as.numeric(colnames(gch_protect2)) >= window_2[1] &
+                                               as.numeric(colnames(gch_protect2)) <= window_2[2], "window2",
+                                             ifelse(as.numeric(colnames(gch_protect2)) > window_2[2] &
+                                                      as.numeric(colnames(gch_protect2)) <= window_3[1], "no window",
+                                                    ifelse(as.numeric(colnames(gch_protect2)) > window_3[1] &
+                                                             as.numeric(colnames(gch_protect2)) <= window_3[2], "window3",
                                                            "no window"))))))
 
 
