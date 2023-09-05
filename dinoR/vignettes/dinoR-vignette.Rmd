@@ -32,8 +32,6 @@ suppressPackageStartupMessages({
 We use biscuit to map 300bp paired-end reads to the genome, umi_tools to remove duplicated UMIs, and the get_data_matrix_from_bams function from the nomeR package (E. Ozonov, unpublished) to get the protection from GCH methylation calls for each read pair (fragment) overlapping a region of interest (ROI). However, any tool that will result in GCH methylation protection calls can be used (for example QuasR), as long as the final data structure is as shown below. Note that we use protection from methylation calls (0 = methylated, 1 = not methylated). 
 
 ```{r load data}
-#data(NomeMatrix, package = "dinoR")
-
 NomeMatrix <- readRDS(system.file("extdata", "NomeMatrix.rds", package = "dinoR"))
 NomeMatrix
 ```
@@ -79,6 +77,7 @@ res <- diNOMeTest(footprint_counts,WTsamples = c("WT_1","WT_2"),
   KOsamples = c("AdnpKO_1","AdnpKO_2"))
 res
 ```
+
 #### plot the number of regulated ROIs within each ROI type
 
 ```{r nregulated, fig.height=4,fig.width=7}

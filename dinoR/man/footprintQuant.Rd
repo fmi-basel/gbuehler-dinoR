@@ -48,7 +48,7 @@ no Data = fragments where no clear footprint could be assigned due to lack of da
 Count the number of reads in each NOMe state.
 }
 \details{
-Selects 3 windows (-50:-25, -8:8, 25:50) around the center of the provided region of interest (ROI) and calculates the average GpC
+Selects 3 windows (default is -50:-25, -8:8, 25:50) around the center of the provided region of interest (ROI) and calculates the average GpC
 methylation protection for a given fragment across all GpCs in each window.
 If it is above 0.5 the window is deemed protected, below 0.5, unprotected Depending on the protection pattern
 in all windows, a read is put into one of 5 footprint categories: tf bound (0 - 1 - 0), open chromatin (0 - 0 - 0),

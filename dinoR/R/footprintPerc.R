@@ -38,8 +38,8 @@ footprintPerc <- function(footprint_counts,
                           ROIgroup=rep("motif1",nrow(footprint_counts))){
 
   #keep only ROIs where at least one sample has more than 0 total counts
-  footprint_counts <- footprint_counts[which(apply(assays(footprint_counts)[["all"]],1,max,na.rm=TRUE) > 0),]
   ROIgroup <- ROIgroup[which(apply(assays(footprint_counts)[["all"]],1,max,na.rm=TRUE) > 0)]
+  footprint_counts <- footprint_counts[which(apply(assays(footprint_counts)[["all"]],1,max,na.rm=TRUE) > 0),]
 
   #claculate percentages  and re-arrange pattern quantification matrix from summarized experiment
   patterns <- c("tf","open","upNuc","Nuc","downNuc")
