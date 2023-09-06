@@ -11,6 +11,7 @@
 #' the output of the footprintQuant function.
 #' @param WTsamples The control sample names as they appear in footprint_quantifications.
 #' @param KOsamples The treatment sample names as they appear in footprint_quantifications.
+#' @param prior.count The pseudocount used for edgeR::glmQLFit.
 #' @param FDR The FDR cutoff for a ROI - footprint combination to be called regulated in the output.
 #' @param FC The fold change cutoff for a ROI - footprint combination to be called regulated in the output.
 #'
@@ -42,7 +43,7 @@
 #'
 #' @export
 diNOMeTest <- function(footprint_counts,WTsamples=c("WT_1","WT_2"),
-                       KOsamples=c("KO_1","KO_2"),
+                       KOsamples=c("KO_1","KO_2"),prior.count=3,
                        FDR=0.05,FC=2){
 
   #keep only ROIs where all samples have more than 0 total counts
@@ -136,7 +137,7 @@ diNOMeTest <- function(footprint_counts,WTsamples=c("WT_1","WT_2"),
   #dispersion
   y <- estimateDisp(y,dm)
   #model
-  fit <- glmQLFit(y, dm)
+  fit <- glmQLFit(y, dm,prior.count=prior.count)
 
   # use the contrasts defined above to get p-values and fold-changes
   res <- list()
