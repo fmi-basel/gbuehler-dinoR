@@ -9,49 +9,43 @@
 #' @param footprint_counts A Summarized Experiment containing the sample names (colData), ROI names (rowData),
 #' and number of fragments in each NOMe footprint pattern category (assays). For example
 #' the output of the footprintQuant function.
-#' @param ROIgroup A vector of the same length as the number of rows in footprint_counts,
+#' @param minreads The minimum number of fragments to which a footprint could be assigned
+#'  a ROI must have in all samples. All other ROIs are filtered out before the differential NOMe analysis.
+#' @param ROIgroup Column name of a metadata column in the rowData of the RSE,
 #' describing a group each ROI belongs too, for example,
 #' different transcription factor motifs at the center of the ROI.
 #'
 #' @return A tibble where each column corresponds to a sample-footprint percentage and each row to a ROI.
 #'
 #' @examples
-#' library(tibble)
-#' NomeMatrix <- tibble(SampleName = c(rep("WT_1",5),
-#' rep("WT_2",5),rep("KO_1",5),rep("KO_2",5)),
-#' names=rep(paste0("ROI",1:5),4),nFragsAnalyzed=rep(20,20),
-#' GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
-#' replace=TRUE),ncol=150,nrow=20)),20))
-#' footprint_counts <- footprintQuant(NomeMatrix)
+#' NomeData <- createExampleData()
+#' NomeData <- footprintCalc(NomeData)
+#' footprint_counts <- footprintQuant(NomeData)
 #' footprintPerc(footprint_counts)
-#'
 #'
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble tibble
-#' @importFrom stats dist
-#' @importFrom stats hclust
-#' @importFrom SummarizedExperiment assays
-#' @importFrom SummarizedExperiment rowData
+#' @importFrom stats dist hclust
+#' @importFrom SummarizedExperiment assays rowData
 #'
 #' @export
-footprintPerc <- function(footprint_counts,
-                          ROIgroup=rep("motif1",nrow(footprint_counts))){
+footprintPerc <- function(footprint_counts, minreads=1, ROIgroup="motif"){
 
   #keep only ROIs where at least one sample has more than 0 total counts
-  ROIgroup <- ROIgroup[which(apply(assays(footprint_counts)[["all"]],1,max,na.rm=TRUE) > 0)]
-  footprint_counts <- footprint_counts[which(apply(assays(footprint_counts)[["all"]],1,max,na.rm=TRUE) > 0),]
+  footprint_counts <- footprint_counts[which(apply(assays(footprint_counts)[["all"]],1,min,na.rm=TRUE) >= minreads),]
 
   #claculate percentages  and re-arrange pattern quantification matrix from summarized experiment
   patterns <- c("tf","open","upNuc","Nuc","downNuc")
   assay_list <- list()
   for (p in seq_along(patterns)){
     #calculate percentages for all 5 patterns
-    assay_list[[p]] <- (SummarizedExperiment::assays(footprint_counts)[[patterns[p]]]/SummarizedExperiment::assays(footprint_counts)[["all"]])*100
+    assay_list[[p]] <- (assays(footprint_counts)[[patterns[p]]]/assays(footprint_counts)[["all"]])*100
     #remove the pattern from the column name
     colnames(assay_list[[p]]) <- paste(patterns[p], colnames(assay_list[[p]]),sep="_")
   }
   #combine into a data frame, together with ROI name and group
-  patternQuantPercWide <- data.frame(ROI=SummarizedExperiment::rowData(footprint_counts)$ROI,ROIgroup=ROIgroup,do.call("cbind",assay_list))
+  patternQuantPercWide <- data.frame(ROI=rownames(rowData(footprint_counts)),
+                                     ROIgroup=rowData(footprint_counts)[,ROIgroup],do.call("cbind",assay_list))
 
   #change NaNs to NAs
   for (i in 3:ncol(patternQuantPercWide)){

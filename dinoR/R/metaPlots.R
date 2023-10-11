@@ -4,19 +4,15 @@
 #'
 #' @details  Summarizes the GpC methylation protections across selected ROIs.
 #'
-#' @param NomeMatrix A tibble where each row corresponds to a sample ROI combination,
-#' which should contain the following columns:
-#' nFragsAnalyzed = the number fragments (read pairs) that was available
-#' names = the names of the ROIs that were analyzed
-#' SampleName = the names of the samples that were analyzed
-#' GCH_DataMatrix = for every combination of ROI and sample, a matrix where the columns
-#' correspond to genomic positions from start to end of the ROI and the rows to fragments.
-#' 1 = protected from GpC methylation. 0 = not protected from GpC methylation.
+#' @param NomeData A Ranged Summarized Experiment with an entry for each ROI. The rowData should contain information about each ROI,
+#' including a ROIgroup.The assays should contain:nFragsAnalyzed, describing the number of fragments that were analyzed for each sample/ROI combination.
+#' reads, containg a Gpos object for each sample/ROI combination, with a position for each base in the ROI and two metadata columns: protection,
+#' a sparse amtrix where TRUE stands for Cs protected from methylation, and methylation, where TRUE stands for methylated Cs.
 #' @param nr Integer used as a cutoff to filter sample ROI combinations that have less than
 #' (\code{nr}) fragments analyzed (nFragsAnalyzed column).
 #' @param nROI The number of ROIs that need to have a GpC methylation measurement at a given
 #' position for this position to be included in the plot.
-#' @param ROIgroup A vector of the same length as the number of rows in NomeMatrix,
+#' @param ROIgroup Column name of a metadata column in the rowData of the RSE,
 #' describing a group each ROI belongs too, for example,
 #' different transcription factor motifs at the center of the ROI.
 #' @param span The span option to be used for the loess function (to draw a line through the datapoints).
@@ -25,85 +21,100 @@
 #'
 #'
 #' @examples
-#' library(tibble)
-#' NomeMatrix <- tibble(SampleName = c(rep("WT",10),rep("KO",10)),
-#' names=rep(paste0("ROI",1:10),2),nFragsAnalyzed=rep(20,20),
-#' GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
-#' replace=TRUE),ncol=150,nrow=20)),20))
-#' metaPlots(NomeMatrix)
+#' NomeData <- createExampleData()
+#' metaPlots(NomeData)
 #'
 #' @importFrom tibble tibble
 #' @importFrom tidyr pivot_longer
 #' @importFrom tidyselect all_of
 #' @importFrom stats loess
+#' @importFrom SummarizedExperiment colData rowData assays
+#' @importFrom Matrix Matrix
+#' @importFrom GenomicRanges mcols
 #'
 #' @export
-metaPlots <- function(NomeMatrix,nr=2,nROI=2,ROIgroup=rep("motif1",nrow(NomeMatrix)),span=0.05){
-    NomeMatrix$type <- ROIgroup
-    NomeMatrix <- NomeMatrix[NomeMatrix$nFragsAnalyzed > nr,] #select only amplicon/sample pairs with >nr reads
+metaPlots <- function(NomeData,nr=2,nROI=2,ROIgroup="motif",span=0.05){
 
-    amplicons <- unique(NomeMatrix$names)
-    all.samples2 <- unique(NomeMatrix$SampleName)
-    types <- unique(NomeMatrix$type)
+  #get sample names and types and number of positions
+  samples <- unique(colData(NomeData)$samples)
+  types <- unique(rowData(NomeData)[,ROIgroup])
+  npos <- length(assays(NomeData)[["reads"]][1,1][[1]])
 
-    perc.meth.list <- list()
+  #average for each sample over all ROIs of a certain type
+  perc.meth.list <- list()
 
-    #loop through samples
-    for (s in seq_along(all.samples2)){
-        Nome_matrix.shifted2 <- NomeMatrix[NomeMatrix$SampleName==all.samples2[s],]
+  for (s in seq_along(samples)){
+    #prepare empty matrix for average protection values...
+    TypeAves <- matrix(nrow=length(types),ncol=npos)
+    #...and number ROIs contributing to a certain position average
+    TypeNs <- matrix(nrow=length(types),ncol=npos)
 
-        #loop through amplicon types
-        TypeAves <- matrix(nrow=length(types),ncol=ncol(Nome_matrix.shifted2$GCH_DataMatrix[[1]]))
-        TypeNs <- matrix(nrow=length(types),ncol=ncol(Nome_matrix.shifted2$GCH_DataMatrix[[1]]))
+    # subset the RSE to the current sample
+    NomeData1 <- NomeData[,samples[s]]
 
-        for (t in seq_along(types)){
-            NomeList <- Nome_matrix.shifted2$GCH_DataMatrix[Nome_matrix.shifted2$type==types[t]]
-            #column means of all positions across reads per amplicon
-            ampliAves <- t(vapply(NomeList,colMeans,rep(0,ncol(TypeAves)),na.rm=TRUE))
-            #column means across amplicons for each position
-            TypeAves[t,] <- colMeans(ampliAves,na.rm=TRUE)*100
-            #number of amplicons with a 0/1 value (GpC) at each position
-            TypeNs[t,] <- apply(X = ampliAves,2,function(x){length(x[!is.na(x)])})
-       }
+    for (t in seq_along(types)){
+      #keep only the data for a given type of amplicon
+      NomeData2 <-  NomeData1[rowData(NomeData1)[,ROIgroup] == types[t],]
+      #filter out the amplicons that have < nr reads
+      NomeData2 <-  NomeData2[as.vector(assays(NomeData2)[["nFragsAnalyzed"]] > nr),]
 
-       #add names
-       TypeAves <- data.frame(t(TypeAves))
-       colnames(TypeAves) <- types
+      #average protetction per position
+      #ampliAves <- sapply(assays(NomeData2)[["reads"]],.aveProt)
+      ampliAves <- vapply(assays(NomeData2)[["reads"]],.aveProt,rep(NaN,npos))
 
-       TypeNs <- data.frame(t(TypeNs))
-       colnames(TypeNs) <- types
+      #average over all the ROIs of a certain type t
+      TypeAves[t,] <- rowMeans(ampliAves,na.rm=TRUE)*100
+      TypeNs[t,] <- apply(X = ampliAves,1,function(x){length(x[!is.na(x)])})
+    }
+    #add names
+    TypeAves <- data.frame(t(TypeAves))
+    colnames(TypeAves) <- types
 
-       # add position headeers
-       ColNumbers <- -floor((nrow(TypeAves)/2)): floor((nrow(TypeAves)/2))
-       if (nrow(TypeAves)%%2==0){
-           TypeAves$position <- ColNumbers[-1]
-          TypeNs$position <- ColNumbers[-1]
-       } else {
-           TypeAves$position <- ColNumbers
-           TypeNs$position <- ColNumbers
-       }
+    TypeNs <- data.frame(t(TypeNs))
+    colnames(TypeNs) <- types
 
-       #remove %protection values with less than n GpCs
-       for (t in seq_along(types)){
-           TypeAves[TypeNs[,t] < nROI,t] <- NaN
-       }
-
-       #make long
-       perc.meth2 <- pivot_longer(TypeAves,cols=all_of(types),names_to="type",values_to = "protection")
-       perc.meth2 <- perc.meth2[is.na(perc.meth2$protection) ==FALSE,]
-
-       perc.meth <- data.frame()
-       for (g in seq_along(unique(perc.meth2$type))){
-           perc.meth3 <- perc.meth2[perc.meth2$type==unique(perc.meth2$type)[g],]
-          perc.meth3$loess <- loess(perc.meth3$protection ~ perc.meth3$position,span=span)$fitted
-          perc.meth <- rbind(perc.meth,perc.meth3)
-       }
-
-       #save the methylation profiles to a table
-       perc.meth$sample <- all.samples2[s]
-       perc.meth.list[[s]] <- perc.meth
+    # add position headers
+    ColNumbers <- -floor((nrow(TypeAves)/2)): floor((nrow(TypeAves)/2))
+    if (nrow(TypeAves)%%2==0){
+      TypeAves$position <- ColNumbers[-1]
+      TypeNs$position <- ColNumbers[-1]
+    } else {
+      TypeAves$position <- ColNumbers
+      TypeNs$position <- ColNumbers
     }
 
-    perc.meth <- tibble(do.call("rbind",perc.meth.list))
-    return(perc.meth)
+    #remove %protection values with less than n GpCs
+    for (t in seq_along(types)){
+      TypeAves[TypeNs[,t] < nROI,t] <- NaN
+    }
+
+    #make long
+    perc.meth2 <- pivot_longer(TypeAves,cols=all_of(types),
+                               names_to="type",values_to = "protection")
+    perc.meth2 <- perc.meth2[is.na(perc.meth2$protection) ==FALSE,]
+
+    #add smoothened values
+    perc.meth <- data.frame()
+    for (g in seq_along(unique(perc.meth2$type))){
+      perc.meth3 <- perc.meth2[perc.meth2$type==unique(perc.meth2$type)[g],]
+      perc.meth3$loess <- loess(perc.meth3$protection ~ perc.meth3$position,span=span)$fitted
+      perc.meth <- rbind(perc.meth,perc.meth3)
+    }
+    #save the methylation profiles to a table
+    perc.meth$sample <- samples[s]
+    perc.meth.list[[s]] <- perc.meth
+  }
+
+  perc.meth <- tibble(do.call("rbind",perc.meth.list))
+  return(perc.meth)
+}
+
+# function to combine the 2 sparse matrices (protection and methylation)...
+# ...and calculate rowMeans (average protection per position)
+.aveProt <- function(x){
+  x_both <- mcols(x)[,"protection"] - mcols(x)[,"methylation"]
+  x_both2 <- as.matrix(Matrix(x_both,sparse=FALSE))
+  x_both2[x_both2==0] <- NA
+  x_both2[x_both2==-1] <- 0
+  rowMeans(x_both2,na.rm=TRUE)
 }

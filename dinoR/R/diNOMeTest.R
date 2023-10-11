@@ -11,6 +11,8 @@
 #' the output of the footprintQuant function.
 #' @param WTsamples The control sample names as they appear in footprint_quantifications.
 #' @param KOsamples The treatment sample names as they appear in footprint_quantifications.
+#' @param minreads The minimum number of fragments to which a footprint could be assigned
+#'  a ROI must have in all samples. All other ROIs are filtered out before the differential NOMe analysis.
 #' @param prior.count The pseudocount used for edgeR::glmQLFit.
 #' @param FDR The FDR cutoff for a ROI - footprint combination to be called regulated in the output.
 #' @param FC The fold change cutoff for a ROI - footprint combination to be called regulated in the output.
@@ -18,36 +20,26 @@
 #' @return A tibble with the results of differential fragment count testing for each ROI-footprint combination.
 #'
 #' @examples
-#' library(tibble)
-#' NomeMatrix <- tibble(SampleName = c(rep("WT_1",5),
-#' rep("WT_2",5),rep("KO_1",5),rep("KO_2",5)),
-#' names=rep(paste0("ROI",1:5),4),nFragsAnalyzed=rep(20,20),
-#' GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
-#' replace=TRUE),ncol=150,nrow=20)),20))
-#' patternQuant <- footprintQuant(NomeMatrix)
-#' diNOMeTest(patternQuant,WTsamples = c("WT_1","WT_2"),
+#' NomeData <- createExampleData()
+#' NomeData <- footprintCalc(NomeData)
+#' footprint_counts <- footprintQuant(NomeData)
+#' diNOMeTest(footprint_counts,WTsamples = c("WT_1","WT_2"),
 #' KOsamples = c("KO_1","KO_2"))
 #'
-#' @importFrom stats model.matrix
-#' @importFrom stats complete.cases
+#' @importFrom stats model.matrix complete.cases
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble tibble
-#' @importFrom edgeR DGEList
-#' @importFrom edgeR calcNormFactors
-#' @importFrom edgeR estimateDisp
-#' @importFrom edgeR glmQLFit
-#' @importFrom edgeR glmQLFTest
-#' @importFrom edgeR topTags
-#' @importFrom SummarizedExperiment assays
-#' @importFrom SummarizedExperiment rowData
+#' @importFrom edgeR DGEList calcNormFactors estimateDisp glmQLFit glmQLFTest topTags
+#' @importFrom SummarizedExperiment assays rowData
 #'
 #' @export
 diNOMeTest <- function(footprint_counts,WTsamples=c("WT_1","WT_2"),
-                       KOsamples=c("KO_1","KO_2"),prior.count=3,
+                       KOsamples=c("KO_1","KO_2"), minreads=1, prior.count=3,
                        FDR=0.05,FC=2){
 
   #keep only ROIs where all samples have more than 0 total counts
-  footprint_counts <- footprint_counts[which(apply(assays(footprint_counts)[["all"]],1,min,na.rm=TRUE) > 0),]
+  footprint_counts <- footprint_counts[which(apply(assays(footprint_counts)[["all"]],
+                                                   1,min,na.rm=TRUE) >= minreads),]
 
   #determine number of replicates
   nrepWT <- length(WTsamples)
@@ -93,10 +85,11 @@ diNOMeTest <- function(footprint_counts,WTsamples=c("WT_1","WT_2"),
   patterns <- c("all","tf","open","Nuc","upNuc","downNuc")
   assay_list <- list()
   for (p in seq_along(patterns)){
-    assay_list[[p]] <- SummarizedExperiment::assays(footprint_counts)[[patterns[p]]]
+    assay_list[[p]] <- assays(footprint_counts)[[patterns[p]]]
     colnames(assay_list[[p]]) <- paste(patterns[p], colnames(assay_list[[p]]),sep="_")
   }
-  footprint_counts1 <- data.frame(ROI=SummarizedExperiment::rowData(footprint_counts)$ROI,do.call("cbind",assay_list))
+  footprint_counts1 <- data.frame(ROI=rownames(rowData(footprint_counts)),
+                                  do.call("cbind",assay_list))
 
   #only keep ROIs where there were data in all samples
   footprint_counts1 <- footprint_counts1[complete.cases(footprint_counts1)==TRUE,]
@@ -106,7 +99,8 @@ diNOMeTest <- function(footprint_counts,WTsamples=c("WT_1","WT_2"),
   #add sample names to annots using the specifications which samples are WT and which samples are KO
   sample_names <- character(0)
    for (i in seq_along(allSamples)){
-    sample_names <- c(sample_names,paste(c("all","tf","open","Nuc","upNuc","downNuc"),allSamples[i],sep="_"))
+    sample_names <- c(sample_names,paste(c("all","tf","open","Nuc","upNuc","downNuc"),
+                                         allSamples[i],sep="_"))
   }
   annots$sample <- sample_names
 
@@ -116,7 +110,8 @@ diNOMeTest <- function(footprint_counts,WTsamples=c("WT_1","WT_2"),
   #generate PatternQuant matrix with read counts per sample
   footprint_counts_sums <- matrix(ncol=length(allSamples),nrow=nrow(footprint_counts2))
   for (i in seq_along(allSamples)){
-    footprint_counts_sums[,i] <-  apply(footprint_counts2[,grep(allSamples[i],colnames(footprint_counts2))],1,sum)
+    footprint_counts_sums[,i] <-  apply(footprint_counts2[,grep(allSamples[i],
+                                                                colnames(footprint_counts2))],1,sum)
   }
   colnames(footprint_counts_sums) <- allSamples
   rownames(footprint_counts_sums) <- rownames(footprint_counts2)
@@ -146,6 +141,7 @@ diNOMeTest <- function(footprint_counts,WTsamples=c("WT_1","WT_2"),
     res[[i]] <- data.frame(topTags(qlf,n=nrow(footprint_counts2),adjust.method = "BH"))
     res[[i]]$contrasts <- names(contrasts)[i]
     res[[i]]$ROI <- row.names(res[[i]])
+    res[[i]] <- cbind(res[[i]],rowData(footprint_counts))
   }
   res2 <- do.call("rbind",res)
   res2$logadjPval <- -log10(res2$FDR)

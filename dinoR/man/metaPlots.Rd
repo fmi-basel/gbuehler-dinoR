@@ -4,23 +4,13 @@
 \alias{metaPlots}
 \title{metaPlots}
 \usage{
-metaPlots(
-  NomeMatrix,
-  nr = 2,
-  nROI = 2,
-  ROIgroup = rep("motif1", nrow(NomeMatrix)),
-  span = 0.05
-)
+metaPlots(NomeData, nr = 2, nROI = 2, ROIgroup = "motif", span = 0.05)
 }
 \arguments{
-\item{NomeMatrix}{A tibble where each row corresponds to a sample ROI combination,
-which should contain the following columns:
-nFragsAnalyzed = the number fragments (read pairs) that was available
-names = the names of the ROIs that were analyzed
-SampleName = the names of the samples that were analyzed
-GCH_DataMatrix = for every combination of ROI and sample, a matrix where the columns
-correspond to genomic positions from start to end of the ROI and the rows to fragments.
-1 = protected from GpC methylation. 0 = not protected from GpC methylation.}
+\item{NomeData}{A Ranged Summarized Experiment with an entry for each ROI. The rowData should contain information about each ROI,
+including a ROIgroup.The assays should contain:nFragsAnalyzed, describing the number of fragments that were analyzed for each sample/ROI combination.
+reads, containg a Gpos object for each sample/ROI combination, with a position for each base in the ROI and two metadata columns: protection,
+a sparse amtrix where TRUE stands for Cs protected from methylation, and methylation, where TRUE stands for methylated Cs.}
 
 \item{nr}{Integer used as a cutoff to filter sample ROI combinations that have less than
 (\code{nr}) fragments analyzed (nFragsAnalyzed column).}
@@ -28,7 +18,7 @@ correspond to genomic positions from start to end of the ROI and the rows to fra
 \item{nROI}{The number of ROIs that need to have a GpC methylation measurement at a given
 position for this position to be included in the plot.}
 
-\item{ROIgroup}{A vector of the same length as the number of rows in NomeMatrix,
+\item{ROIgroup}{Column name of a metadata column in the rowData of the RSE,
 describing a group each ROI belongs too, for example,
 different transcription factor motifs at the center of the ROI.}
 
@@ -44,11 +34,7 @@ Plot the summarized GpC methylation protections across selected ROIs.
 Summarizes the GpC methylation protections across selected ROIs.
 }
 \examples{
-library(tibble)
-NomeMatrix <- tibble(SampleName = c(rep("WT",10),rep("KO",10)),
-names=rep(paste0("ROI",1:10),2),nFragsAnalyzed=rep(20,20),
-GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
-replace=TRUE),ncol=150,nrow=20)),20))
-metaPlots(NomeMatrix)
+NomeData <- createExampleData()
+metaPlots(NomeData)
 
 }

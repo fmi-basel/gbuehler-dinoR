@@ -26,12 +26,15 @@ Suggests:
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Imports: 
+    BiocGenerics,
     circlize,
     ComplexHeatmap,
     cowplot,
     dplyr,
     edgeR,
+    GenomicRanges,
     ggplot2,
+    Matrix,
     rlang,
     stats,
     SummarizedExperiment,

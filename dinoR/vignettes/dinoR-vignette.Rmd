@@ -32,8 +32,8 @@ suppressPackageStartupMessages({
 We use biscuit to map 300bp paired-end reads to the genome, umi_tools to remove duplicated UMIs, and the get_data_matrix_from_bams function from the nomeR package (E. Ozonov, unpublished) to get the protection from GCH methylation calls for each read pair (fragment) overlapping a region of interest (ROI). However, any tool that will result in GCH methylation protection calls can be used (for example QuasR), as long as the final data structure is as shown below. Note that we use protection from methylation calls (0 = methylated, 1 = not methylated). 
 
 ```{r load data}
-NomeMatrix <- readRDS(system.file("extdata", "NomeMatrix.rds", package = "dinoR"))
-NomeMatrix
+NomeData <- readRDS(system.file("extdata", "NOMeSeqData.rds", package = "dinoR"))
+NomeData
 ```
 
 ### meta plots across ROIs with common TF motifs in the center
@@ -42,8 +42,7 @@ We generate metaplots, grouping our ROIs into those that have  Rest, Ctcf, or Ad
 We use 2 samples from WT mouse ES cells,a nd two samples from Adnp KO mouse ES cells.
 
 ```{r,fig.height=6,fig.width=8}
-avePlotData <- metaPlots(NomeMatrix=NomeMatrix,ROIgroup=matrix(
-  unlist(strsplit(NomeMatrix$names,"_")),ncol=4,byrow=TRUE)[,1])
+avePlotData <- metaPlots(NomeData=NomeData,nr=10,ROIgroup = "motif")
 
 #plot average plots
 ggplot(avePlotData, aes(x=position,y=protection)) + geom_point(alpha=0.5) + 
@@ -60,10 +59,11 @@ To quantify these differences, we can now classify each fragment according to fi
 ### generate read counts for TF open nuc 
 
 ```{r read counts}
-footprint_counts <- footprintQuant(NomeMatrix,nr=10)
+NomeData <- footprintCalc(NomeData)
+NomeData <- footprintQuant(NomeData)
 #remove any rows where no reads could be assigned a footprint
 #footprint_counts <- footprint_counts[rowSums(footprint_counts[,3:7]) > 0,]
-footprint_counts
+NomeData
 ```
 
 Note that if a fragment does not have methylation protection data in all three windows needed for classification, the fragment will be counted as noData. 
@@ -73,7 +73,7 @@ Next we can test for differential abundance of footprints between Adnp KO and WT
 ### calculate differential NOMe-seq footprint abundance between Adnp KO and WT 
 
 ```{r diNOMe}
-res <- diNOMeTest(footprint_counts,WTsamples = c("WT_1","WT_2"),
+res <- diNOMeTest(NomeData,WTsamples = c("WT_1","WT_2"),
   KOsamples = c("AdnpKO_1","AdnpKO_2"))
 res
 ```
@@ -81,10 +81,9 @@ res
 #### plot the number of regulated ROIs within each ROI type
 
 ```{r nregulated, fig.height=4,fig.width=7}
-res$ampType <- matrix(unlist(strsplit(res$ROI,"_")),ncol=4,byrow=TRUE)[,1]
 
-res %>% group_by(contrasts,ampType,regulated) %>% summarize(n=n()) %>% 
-  ggplot(aes(x=ampType,y=n,fill=regulated)) + geom_bar(stat="identity") + 
+res %>% group_by(contrasts,motif,regulated) %>% summarize(n=n()) %>% 
+  ggplot(aes(x=motif,y=n,fill=regulated)) + geom_bar(stat="identity") + 
   facet_grid(~contrasts) + theme_bw() + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
   scale_fill_manual(values=c("orange","grey","blue3"))
@@ -102,8 +101,7 @@ ggplot(res,aes(y=logFC,x=logCPM,col=regulated)) + geom_point() +
 ### calculate the percentage of fragments in each footprint type and plot a heatmap comparing percentages in WT and KO
 
 ```{r percentages,fig.height=5,fig.width=7}
-ROIgroup <-  matrix(unlist(strsplit(rowData(footprint_counts)$ROI,"_")),ncol=4,byrow=TRUE)[,1]
-footprint_percentages <- footprintPerc(footprint_counts,ROIgroup)
+footprint_percentages <- footprintPerc(NomeData)
 
 #plot heatmaps 
 fpPercHeatmap(footprint_percentages)

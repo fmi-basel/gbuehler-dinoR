@@ -4,62 +4,35 @@
 \alias{footprintQuant}
 \title{footprintQuant}
 \usage{
-footprintQuant(
-  NomeMatrix,
-  nr = 2,
-  window_1 = c(-50, -25),
-  window_2 = c(-8, 8),
-  window_3 = c(25, 50)
-)
+footprintQuant(NomeData)
 }
 \arguments{
-\item{NomeMatrix}{A tibble where each row corresponds to a sample ROI combination,
-which should contain the following columns:
-nFragsAnalyzed = the number fragments (read pairs) that was available
-names = the names of the ROIs that were analyzed
-SampleName = the names of the samples that were analzyed
-GCH_DataMatrix = for every combination of ROI and sample, a matrix where the columns
-correspond to genomic positions from start to end of the ROI and the rows to fragments.
-1 = protected from GpC methylation. 0 = not protected from GpC methylation.}
-
-\item{nr}{Integer used as a cutoff to filter sample ROI combinations that have less than
-(\code{nr}) fragments analyzed (nFragsAnalyzed column).}
-
-\item{window_1}{Integer vector with two elements representing start and end positions
-of the first window relative to the ROI center.}
-
-\item{window_2}{Integer vector with two elements representing start and end positions
-of the second window relative to the ROI center.}
-
-\item{window_3}{Integer vector with two elements representing start and end positions
-of the third window relative to the ROI center.}
+\item{NomeData}{A Ranged Summarized Experiment with an entry for each ROI. The rowData should contain information about each ROI,
+including a ROIgroup.The assays should contain:nFragsAnalyzed, describing the number of fragments that were analyzed for each sample/ROI combination.
+reads, containg a Gpos object for each sample/ROI combination, with a position for each base in the ROI and two metadata columns: protection,
+a sparse matrix where TRUE stands for Cs protected from methylation, and methylation, where TRUE stands for methylated Cs.
+In addition, there must be an assay called "footprints", which contains the assigned footprint ("tf","open","upNuc","Nuc","downNuc") for each fragment
+(generated using the footprintCalc function).}
 }
 \value{
-A SummarizedExperiment for the number of fragments in each footprint category,
-with an assay for each pattern (see below), a column for each sample, and a row for each ROI.
+The Ranged Summarized Experiment with an assay added for each footprint type,
+containing the number of fragments that contain that footprint. An assay with the total number
+of patternable fragments ("all") is also added.
 tf = transcription factor footprint
 open = open chromatin footprint
 upNuc = upstream nucleosome footprint
 downNuc = downstream nucleosome footprint
 Nuc = other nucleosome footprints
-no Data = fragments where no clear footprint could be assigned due to lack of data (GpCs) in one of the windows
 }
 \description{
-Count the number of reads in each NOMe state.
+Quantify the footprint types.
 }
 \details{
-Selects 3 windows (default is -50:-25, -8:8, 25:50) around the center of the provided region of interest (ROI) and calculates the average GpC
-methylation protection for a given fragment across all GpCs in each window.
-If it is above 0.5 the window is deemed protected, below 0.5, unprotected Depending on the protection pattern
-in all windows, a read is put into one of 5 footprint categories: tf bound (0 - 1 - 0), open chromatin (0 - 0 - 0),
-upstream nucleosome (1 - 1 - 0), other nucleosome (1 - 1 - 1, 1 - 0 - 0, 0 - 0 - 1, 1 - 0 - 1), and downstream nucleosome (0 - 1 - 1).
+Count the number of fragments corresponding to a footprint type for each sample-ROI combination.
 }
 \examples{
-library(tibble)
-NomeMatrix <- tibble(SampleName = c(rep("WT",10),rep("KO",10)),
-names=rep(paste0("ROI",1:10),2),nFragsAnalyzed=rep(20,20),
-GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
-replace=TRUE),ncol=150,nrow=20)),20))
-footprintQuant(NomeMatrix)
+NomeData <- createExampleData()
+NomeData <- footprintCalc(NomeData)
+footprintQuant(NomeData)
 
 }

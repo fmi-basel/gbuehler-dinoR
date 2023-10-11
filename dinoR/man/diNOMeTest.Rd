@@ -8,6 +8,8 @@ diNOMeTest(
   footprint_counts,
   WTsamples = c("WT_1", "WT_2"),
   KOsamples = c("KO_1", "KO_2"),
+  minreads = 1,
+  prior.count = 3,
   FDR = 0.05,
   FC = 2
 )
@@ -20,6 +22,11 @@ the output of the footprintQuant function.}
 \item{WTsamples}{The control sample names as they appear in footprint_quantifications.}
 
 \item{KOsamples}{The treatment sample names as they appear in footprint_quantifications.}
+
+\item{minreads}{The minimum number of fragments to which a footprint could be assigned
+a ROI must have in all samples. All other ROIs are filtered out before the differential NOMe analysis.}
+
+\item{prior.count}{The pseudocount used for edgeR::glmQLFit.}
 
 \item{FDR}{The FDR cutoff for a ROI - footprint combination to be called regulated in the output.}
 
@@ -37,14 +44,10 @@ Uses edgeR's quasi-likelihood methods to conveniently test for differential prop
 one of 5 distinct footprints between at least two control and at least two treatment samples.
 }
 \examples{
-library(tibble)
-NomeMatrix <- tibble(SampleName = c(rep("WT_1",5),
-rep("WT_2",5),rep("KO_1",5),rep("KO_2",5)),
-names=rep(paste0("ROI",1:5),4),nFragsAnalyzed=rep(20,20),
-GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
-replace=TRUE),ncol=150,nrow=20)),20))
-patternQuant <- footprintQuant(NomeMatrix)
-diNOMeTest(patternQuant,WTsamples = c("WT_1","WT_2"),
+NomeData <- createExampleData()
+NomeData <- footprintCalc(NomeData)
+footprint_counts <- footprintQuant(NomeData)
+diNOMeTest(footprint_counts,WTsamples = c("WT_1","WT_2"),
 KOsamples = c("KO_1","KO_2"))
 
 }

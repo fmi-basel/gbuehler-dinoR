@@ -4,17 +4,17 @@
 \alias{footprintPerc}
 \title{footprintPerc}
 \usage{
-footprintPerc(
-  footprint_counts,
-  ROIgroup = rep("motif1", nrow(footprint_counts))
-)
+footprintPerc(footprint_counts, minreads = 1, ROIgroup = "motif")
 }
 \arguments{
 \item{footprint_counts}{A Summarized Experiment containing the sample names (colData), ROI names (rowData),
 and number of fragments in each NOMe footprint pattern category (assays). For example
 the output of the footprintQuant function.}
 
-\item{ROIgroup}{A vector of the same length as the number of rows in footprint_counts,
+\item{minreads}{The minimum number of fragments to which a footprint could be assigned
+a ROI must have in all samples. All other ROIs are filtered out before the differential NOMe analysis.}
+
+\item{ROIgroup}{Column name of a metadata column in the rowData of the RSE,
 describing a group each ROI belongs too, for example,
 different transcription factor motifs at the center of the ROI.}
 }
@@ -30,14 +30,9 @@ the table into wide format, where each column corresponds to a sample-footprint 
 and clusters the rows by similarity.
 }
 \examples{
-library(tibble)
-NomeMatrix <- tibble(SampleName = c(rep("WT_1",5),
-rep("WT_2",5),rep("KO_1",5),rep("KO_2",5)),
-names=rep(paste0("ROI",1:5),4),nFragsAnalyzed=rep(20,20),
-GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
-replace=TRUE),ncol=150,nrow=20)),20))
-footprint_counts <- footprintQuant(NomeMatrix)
+NomeData <- createExampleData()
+NomeData <- footprintCalc(NomeData)
+footprint_counts <- footprintQuant(NomeData)
 footprintPerc(footprint_counts)
-
 
 }

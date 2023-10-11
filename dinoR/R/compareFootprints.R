@@ -15,29 +15,16 @@
 #' @return A scatter plot for each footprint pattern comparing WT and KO percentages and significance test results.
 #'
 #' @examples
-#' library(tibble)
-#' NomeMatrix <- tibble(SampleName = c(rep("WT_1",5),
-#' rep("WT_2",5),rep("KO_1",5),rep("KO_2",5)),
-#' names=rep(paste0("ROI",1:5),4),nFragsAnalyzed=rep(20,20),
-#' GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
-#' replace=TRUE),ncol=150,nrow=20)),20))
-#' footprint_counts <- footprintQuant(NomeMatrix)
+#' NomeData <- createExampleData()
+#' NomeData <- footprintCalc(NomeData)
+#' footprint_counts <- footprintQuant(NomeData)
 #' res <- diNOMeTest(footprint_counts,WTsamples = c("WT_1","WT_2"),
 #' KOsamples = c("KO_1","KO_2"))
 #' footprint_percentages <- footprintPerc(footprint_counts)
 #' compareFootprints(footprint_percentages,res,plotcols="black")
 #'
-#' @importFrom ggplot2 ggplot
-#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 ggplot aes geom_point theme_classic xlim ylim geom_abline scale_color_manual scale_shape_manual ggtitle
 #' @importFrom rlang .data
-#' @importFrom ggplot2 geom_point
-#' @importFrom ggplot2 theme_classic
-#' @importFrom ggplot2 xlim
-#' @importFrom ggplot2 ylim
-#' @importFrom ggplot2 geom_abline
-#' @importFrom ggplot2 scale_color_manual
-#' @importFrom ggplot2 scale_shape_manual
-#' @importFrom ggplot2 ggtitle
 #' @importFrom cowplot plot_grid
 #' @importFrom dplyr left_join
 #'
@@ -51,23 +38,29 @@ compareFootprints <- function(footprint_percentages, res, WTsamples = c("WT_1","
   plotlist <- list()
   for (i in seq_along(patterns)){
     #extract all columns with tf (or other pattern) starting
-    patternQuantPercSel <- footprint_percentages[,grep(paste0("^",patterns[i]), colnames(footprint_percentages))]
+    patternQuantPercSel <- footprint_percentages[,grep(paste0("^",patterns[i]),
+                                                       colnames(footprint_percentages))]
     #remove tf_ to get sample names
     colnames(patternQuantPercSel) <- gsub(paste0(patterns[i],"_"),"",colnames(patternQuantPercSel))
 
     #average samples based on WT and KO specifications
     patternQuantPercSelAve <- data.frame(footprint_percentages[,seq(1,2)],
-                                         WT=apply(patternQuantPercSel[,which(colnames(patternQuantPercSel) %in% WTsamples)],1,mean),
-                                         KO=apply(patternQuantPercSel[,which(colnames(patternQuantPercSel) %in% KOsamples)],1,mean))
+                                         WT=apply(patternQuantPercSel[,which(colnames(patternQuantPercSel)
+                                                                             %in% WTsamples)],1,mean),
+                                         KO=apply(patternQuantPercSel[,which(colnames(patternQuantPercSel)
+                                                                             %in% KOsamples)],1,mean))
 
     # combine with tf_ contrast
-    patternQuantPercSelAve <- left_join(patternQuantPercSelAve,res[res$contrasts==paste0(patterns[i],"_vs_all"),],by=c("ROI"="ROI"))
+    patternQuantPercSelAve <- left_join(patternQuantPercSelAve,
+                                        res[res$contrasts==paste0(patterns[i],"_vs_all"),],by=c("ROI"="ROI"))
 
     #plot
-    plotlist[[i]] <-  ggplot(patternQuantPercSelAve,aes(x=.data$WT,y=.data$KO,col=.data$ROIgroup,shape=.data$regulated)) +
+    plotlist[[i]] <-  ggplot(patternQuantPercSelAve,
+                             aes(x=.data$WT,y=.data$KO,col=.data$ROIgroup,shape=.data$regulated)) +
       geom_point() + theme_classic() + xlim(c(0,100)) + ylim(c(0,100))+
       geom_abline(intercept=0,slope=1,linetype="dashed",col="grey",alpha=0.5) +
-      scale_color_manual(values=plotcols) + scale_shape_manual(values=c("down"= 6,"no" = 0,"up" = 2)) + ggtitle(patterns[i])
+      scale_color_manual(values=plotcols) +
+      scale_shape_manual(values=c("down"= 6,"no" = 0,"up" = 2)) + ggtitle(patterns[i])
   }
 
   return(plot_grid(plotlist = plotlist, ncol = 3, align = "vh"))

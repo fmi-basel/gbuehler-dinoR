@@ -27,13 +27,9 @@ Draws heatmaps of the percentages of all reads in a ROI-sample combination in ea
 footprint pattern ("tf", "open", "upNuc", "Nuc", "downNuc"). The rows of the heatmaps are split by ROI group.
 }
 \examples{
-library(tibble)
-NomeMatrix <- tibble(SampleName = c(rep("WT_1",5),
-rep("WT_2",5),rep("KO_1",5),rep("KO_2",5)),
-names=rep(paste0("ROI",1:5),4),nFragsAnalyzed=rep(20,20),
-GCH_DataMatrix=rep(list(matrix(sample(c(0,1),size=150*20,
-replace=TRUE),ncol=150,nrow=20)),20))
-footprint_counts <- footprintQuant(NomeMatrix)
+NomeData <- createExampleData()
+NomeData <- footprintCalc(NomeData)
+footprint_counts <- footprintQuant(NomeData)
 fp <- footprintPerc(footprint_counts)
 fpPercHeatmap(fp)
 
