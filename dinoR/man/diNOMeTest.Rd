@@ -11,7 +11,8 @@ diNOMeTest(
   minreads = 1,
   prior.count = 3,
   FDR = 0.05,
-  FC = 2
+  FC = 2,
+  combineNucCounts = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ a ROI must have in all samples. All other ROIs are filtered out before the diffe
 \item{FDR}{The FDR cutoff for a ROI - footprint combination to be called regulated in the output.}
 
 \item{FC}{The fold change cutoff for a ROI - footprint combination to be called regulated in the output.}
+
+\item{combineNucCounts}{If TRUE, the upNuc, downNuc, and Nuc fragment counts will be combined into the Nuc category.}
 }
 \value{
 A tibble with the results of differential fragment count testing for each ROI-footprint combination.

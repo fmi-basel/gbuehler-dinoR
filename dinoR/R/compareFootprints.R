@@ -27,13 +27,15 @@
 #' @importFrom rlang .data
 #' @importFrom cowplot plot_grid
 #' @importFrom dplyr left_join
+#' @importFrom stringr str_extract
 #'
 #' @export
 compareFootprints <- function(footprint_percentages, res, WTsamples = c("WT_1","WT_2"),
                               KOsamples = c("KO_1","KO_2"), plotcols){
 
 
-  patterns <- c("tf", "open", "upNuc", "Nuc", "downNuc")
+  #patterns <- c("tf", "open", "upNuc", "Nuc", "downNuc")
+  patterns <- unique(str_extract(colnames(footprint_percentages)[3:ncol(footprint_percentages)],"^[^_]+"))
 
   plotlist <- list()
   for (i in seq_along(patterns)){

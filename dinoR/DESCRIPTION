@@ -37,6 +37,7 @@ Imports:
     Matrix,
     rlang,
     stats,
+    stringr,
     SummarizedExperiment,
     tibble,
     tidyr,

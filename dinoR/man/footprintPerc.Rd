@@ -4,7 +4,12 @@
 \alias{footprintPerc}
 \title{footprintPerc}
 \usage{
-footprintPerc(footprint_counts, minreads = 1, ROIgroup = "motif")
+footprintPerc(
+  footprint_counts,
+  minreads = 1,
+  ROIgroup = "motif",
+  combineNucCounts = FALSE
+)
 }
 \arguments{
 \item{footprint_counts}{A Summarized Experiment containing the sample names (colData), ROI names (rowData),
@@ -17,6 +22,8 @@ a ROI must have in all samples. All other ROIs are filtered out before the diffe
 \item{ROIgroup}{Column name of a metadata column in the rowData of the RSE,
 describing a group each ROI belongs too, for example,
 different transcription factor motifs at the center of the ROI.}
+
+\item{combineNucCounts}{If TRUE, the upNuc, downNuc, and Nuc fragment counts will be combined into the Nuc category.}
 }
 \value{
 A tibble where each column corresponds to a sample-footprint percentage and each row to a ROI.

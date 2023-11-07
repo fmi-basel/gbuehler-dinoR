@@ -14,6 +14,7 @@
 #' @param ROIgroup Column name of a metadata column in the rowData of the RSE,
 #' describing a group each ROI belongs too, for example,
 #' different transcription factor motifs at the center of the ROI.
+#' @param combineNucCounts If TRUE, the upNuc, downNuc, and Nuc fragment counts will be combined into the Nuc category.
 #'
 #' @return A tibble where each column corresponds to a sample-footprint percentage and each row to a ROI.
 #'
@@ -26,15 +27,27 @@
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble tibble
 #' @importFrom stats dist hclust
-#' @importFrom SummarizedExperiment assays rowData
+#' @importFrom SummarizedExperiment assays assays<- rowData
 #'
 #' @export
-footprintPerc <- function(footprint_counts, minreads=1, ROIgroup="motif"){
+footprintPerc <- function(footprint_counts, minreads=1, ROIgroup="motif",combineNucCounts =FALSE){
 
   #keep only ROIs where at least one sample has more than 0 total counts
   footprint_counts <- footprint_counts[which(apply(assays(footprint_counts)[["all"]],1,min,na.rm=TRUE) >= minreads),]
 
-  #claculate percentages  and re-arrange pattern quantification matrix from summarized experiment
+  if (combineNucCounts ==TRUE){
+    # 3 patterns: calculate percentages  and re-arrange pattern quantification matrix from summarized experiment
+    assays(footprint_counts)[["Nuc"]] <- assays(footprint_counts)[["Nuc"]] + assays(footprint_counts)[["upNuc"]] + assays(footprint_counts)[["downNuc"]]
+    patterns <- c("tf","open","Nuc")
+    assay_list <- list()
+    for (p in seq_along(patterns)){
+      #calculate percentages for 3 patterns
+      assay_list[[p]] <- (assays(footprint_counts)[[patterns[p]]]/assays(footprint_counts)[["all"]])*100
+      #remove the pattern from the column name
+      colnames(assay_list[[p]]) <- paste(patterns[p], colnames(assay_list[[p]]),sep="_")
+    }
+  } else {
+  # 5 patterns: calculate percentages  and re-arrange pattern quantification matrix from summarized experiment
   patterns <- c("tf","open","upNuc","Nuc","downNuc")
   assay_list <- list()
   for (p in seq_along(patterns)){
@@ -42,7 +55,10 @@ footprintPerc <- function(footprint_counts, minreads=1, ROIgroup="motif"){
     assay_list[[p]] <- (assays(footprint_counts)[[patterns[p]]]/assays(footprint_counts)[["all"]])*100
     #remove the pattern from the column name
     colnames(assay_list[[p]]) <- paste(patterns[p], colnames(assay_list[[p]]),sep="_")
+   }
   }
+
+
   #combine into a data frame, together with ROI name and group
   patternQuantPercWide <- data.frame(ROI=rownames(rowData(footprint_counts)),
                                      ROIgroup=rowData(footprint_counts)[,ROIgroup],do.call("cbind",assay_list))

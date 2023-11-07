@@ -22,13 +22,15 @@
 #'
 #' @importFrom ComplexHeatmap Heatmap
 #' @importFrom circlize colorRamp2
+#' @importFrom stringr str_extract
 #'
 #' @export
 fpPercHeatmap <- function(footprint_percentages,
                           plotcols=c("#236467","#AA9B39","#822B56","#822B26","#822B99")){
 
 
-    patterns <- c("tf", "open", "upNuc", "Nuc", "downNuc")
+    #patterns <- c("tf", "open", "upNuc", "Nuc", "downNuc")
+    patterns <- unique(str_extract(colnames(footprint_percentages)[3:ncol(footprint_percentages)],"^[^_]+"))
     #initialize empty heatmap list
     ht_list <- NULL
     #draw heatmaps
