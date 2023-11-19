@@ -11,6 +11,8 @@
 #' the output of the footprintQuant function.
 #' @param minreads The minimum number of fragments to which a footprint could be assigned
 #'  a ROI must have in all samples. All other ROIs are filtered out before the differential NOMe analysis.
+#' @param meanreads The minimum number of fragments to which a footprint could be assigned
+#'  a ROI must on average across all samples. All other ROIs are filtered out before the differential NOMe analysis.
 #' @param ROIgroup Column name of a metadata column in the rowData of the RSE,
 #' describing a group each ROI belongs too, for example,
 #' different transcription factor motifs at the center of the ROI.
@@ -30,10 +32,11 @@
 #' @importFrom SummarizedExperiment assays assays<- rowData
 #'
 #' @export
-footprintPerc <- function(footprint_counts, minreads=1, ROIgroup="motif",combineNucCounts =FALSE){
+footprintPerc <- function(footprint_counts, minreads=1,meanreads=1, ROIgroup="motif",combineNucCounts =FALSE){
 
   #keep only ROIs where at least one sample has more than 0 total counts
   footprint_counts <- footprint_counts[which(apply(assays(footprint_counts)[["all"]],1,min,na.rm=TRUE) >= minreads),]
+  footprint_counts <- footprint_counts[which(apply(assays(footprint_counts)[["all"]],1,mean,na.rm=TRUE) >= meanreads),]
 
   if (combineNucCounts ==TRUE){
     # 3 patterns: calculate percentages  and re-arrange pattern quantification matrix from summarized experiment

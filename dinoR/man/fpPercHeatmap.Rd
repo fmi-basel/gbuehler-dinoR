@@ -6,12 +6,16 @@
 \usage{
 fpPercHeatmap(
   footprint_percentages,
+  breaks = rep(list(c(0, 50, 100)), 5),
   plotcols = c("#236467", "#AA9B39", "#822B56", "#822B26", "#822B99")
 )
 }
 \arguments{
 \item{footprint_percentages}{A tibble where each column corresponds to a sample-footprint percentage and each row to a ROI,
 with the rows clustered by similarity.}
+
+\item{breaks}{A list of vectors indicating numeric breaks used in ColorRamp2 to define heatmap color gradient,
+with one element per pattern.}
 
 \item{plotcols}{A character vector of 5 colors to be used for the heatmaps of the 5 footprint
 patterns ("tf", "open", "upNuc", "Nuc", "downNuc").}

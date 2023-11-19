@@ -7,6 +7,7 @@
 footprintPerc(
   footprint_counts,
   minreads = 1,
+  meanreads = 1,
   ROIgroup = "motif",
   combineNucCounts = FALSE
 )
@@ -18,6 +19,9 @@ the output of the footprintQuant function.}
 
 \item{minreads}{The minimum number of fragments to which a footprint could be assigned
 a ROI must have in all samples. All other ROIs are filtered out before the differential NOMe analysis.}
+
+\item{meanreads}{The minimum number of fragments to which a footprint could be assigned
+a ROI must on average across all samples. All other ROIs are filtered out before the differential NOMe analysis.}
 
 \item{ROIgroup}{Column name of a metadata column in the rowData of the RSE,
 describing a group each ROI belongs too, for example,

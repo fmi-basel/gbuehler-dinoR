@@ -7,6 +7,8 @@
 #'
 #' @param footprint_percentages A tibble where each column corresponds to a sample-footprint percentage and each row to a ROI,
 #'  with the rows clustered by similarity.
+#' @param breaks A list of vectors indicating numeric breaks used in ColorRamp2 to define heatmap color gradient,
+#'  with one element per pattern.
 #' @param plotcols A character vector of 5 colors to be used for the heatmaps of the 5 footprint
 #' patterns ("tf", "open", "upNuc", "Nuc", "downNuc").
 #'
@@ -25,7 +27,7 @@
 #' @importFrom stringr str_extract
 #'
 #' @export
-fpPercHeatmap <- function(footprint_percentages,
+fpPercHeatmap <- function(footprint_percentages,breaks=rep(list(c(0,50,100)),5),
                           plotcols=c("#236467","#AA9B39","#822B56","#822B26","#822B99")){
 
 
@@ -39,7 +41,7 @@ fpPercHeatmap <- function(footprint_percentages,
         ht_list <- ht_list + Heatmap(matrix = as.matrix(footprint_percentages[,grep(paste0("^",patterns[i]),
                                                                               colnames(footprint_percentages))]),
                                border = TRUE,
-                               col = colorRamp2(breaks = c(0,50,100),
+                               col = colorRamp2(breaks = breaks[[i]],
                                                 colors = c("white",plotcols[i],"black")),
                                cluster_rows = FALSE,
                                column_title = patterns[i],

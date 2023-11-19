@@ -9,6 +9,7 @@ diNOMeTest(
   WTsamples = c("WT_1", "WT_2"),
   KOsamples = c("KO_1", "KO_2"),
   minreads = 1,
+  meanreads = 1,
   prior.count = 3,
   FDR = 0.05,
   FC = 2,
@@ -26,6 +27,9 @@ the output of the footprintQuant function.}
 
 \item{minreads}{The minimum number of fragments to which a footprint could be assigned
 a ROI must have in all samples. All other ROIs are filtered out before the differential NOMe analysis.}
+
+\item{meanreads}{The minimum number of fragments to which a footprint could be assigned
+a ROI must on average across all samples. All other ROIs are filtered out before the differential NOMe analysis.}
 
 \item{prior.count}{The pseudocount used for edgeR::glmQLFit.}
 

@@ -11,6 +11,7 @@
 #' @param WTsamples The control sample names (two replicates) as they appear in footprint_percentages.
 #' @param KOsamples The treatment sample names (two replicates) as they appear in footprint_percentages.
 #' @param plotcols A character vector of colors to be used for distinguishing the ROI groups (has to be the same length as there are ROI groups).
+#' @param facetROIgroup If TRUE, split the plots for each pattern by ROI group.
 #'
 #' @return A scatter plot for each footprint pattern comparing WT and KO percentages and significance test results.
 #'
@@ -23,7 +24,7 @@
 #' footprint_percentages <- footprintPerc(footprint_counts)
 #' compareFootprints(footprint_percentages,res,plotcols="black")
 #'
-#' @importFrom ggplot2 ggplot aes geom_point theme_classic xlim ylim geom_abline scale_color_manual scale_shape_manual ggtitle
+#' @importFrom ggplot2 ggplot aes geom_point theme_classic xlim ylim geom_abline scale_color_manual scale_shape_manual ggtitle facet_wrap vars
 #' @importFrom rlang .data
 #' @importFrom cowplot plot_grid
 #' @importFrom dplyr left_join
@@ -31,7 +32,7 @@
 #'
 #' @export
 compareFootprints <- function(footprint_percentages, res, WTsamples = c("WT_1","WT_2"),
-                              KOsamples = c("KO_1","KO_2"), plotcols){
+                              KOsamples = c("KO_1","KO_2"), plotcols, facetROIgroup = FALSE){
 
 
   #patterns <- c("tf", "open", "upNuc", "Nuc", "downNuc")
@@ -63,6 +64,10 @@ compareFootprints <- function(footprint_percentages, res, WTsamples = c("WT_1","
       geom_abline(intercept=0,slope=1,linetype="dashed",col="grey",alpha=0.5) +
       scale_color_manual(values=plotcols) +
       scale_shape_manual(values=c("down"= 6,"no" = 0,"up" = 2)) + ggtitle(patterns[i])
+   #split the plots by ROIgroup
+    if(facetROIgroup == TRUE){
+    plotlist[[i]] <- plotlist[[i]] + facet_wrap(vars(.data$ROIgroup))
+    }
   }
 
   return(plot_grid(plotlist = plotlist, ncol = 3, align = "vh"))

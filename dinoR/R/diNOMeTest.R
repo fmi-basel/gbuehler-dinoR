@@ -13,6 +13,8 @@
 #' @param KOsamples The treatment sample names as they appear in footprint_quantifications.
 #' @param minreads The minimum number of fragments to which a footprint could be assigned
 #'  a ROI must have in all samples. All other ROIs are filtered out before the differential NOMe analysis.
+#' @param meanreads The minimum number of fragments to which a footprint could be assigned
+#'  a ROI must on average across all samples. All other ROIs are filtered out before the differential NOMe analysis.
 #' @param prior.count The pseudocount used for edgeR::glmQLFit.
 #' @param FDR The FDR cutoff for a ROI - footprint combination to be called regulated in the output.
 #' @param FC The fold change cutoff for a ROI - footprint combination to be called regulated in the output.
@@ -35,12 +37,14 @@
 #'
 #' @export
 diNOMeTest <- function(footprint_counts,WTsamples=c("WT_1","WT_2"),
-                       KOsamples=c("KO_1","KO_2"), minreads=1, prior.count=3,
+                       KOsamples=c("KO_1","KO_2"), minreads=1,meanreads=1, prior.count=3,
                        FDR=0.05,FC=2,combineNucCounts=FALSE){
 
   #keep only ROIs where all samples have more than 0 total counts
   footprint_counts <- footprint_counts[which(apply(assays(footprint_counts)[["all"]],
                                                    1,min,na.rm=TRUE) >= minreads),]
+  footprint_counts <- footprint_counts[which(apply(assays(footprint_counts)[["all"]],
+                                                   1,mean,na.rm=TRUE) >= meanreads),]
 
   #determine number of replicates
   nrepWT <- length(WTsamples)

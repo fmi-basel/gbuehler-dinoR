@@ -9,7 +9,8 @@ compareFootprints(
   res,
   WTsamples = c("WT_1", "WT_2"),
   KOsamples = c("KO_1", "KO_2"),
-  plotcols
+  plotcols,
+  facetROIgroup = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ with the rows clustered by similarity.}
 \item{KOsamples}{The treatment sample names (two replicates) as they appear in footprint_percentages.}
 
 \item{plotcols}{A character vector of colors to be used for distinguishing the ROI groups (has to be the same length as there are ROI groups).}
+
+\item{facetROIgroup}{If TRUE, split the plots for each pattern by ROI group.}
 }
 \value{
 A scatter plot for each footprint pattern comparing WT and KO percentages and significance test results.
