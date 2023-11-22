@@ -127,7 +127,7 @@ We can see that in Adnp KO samples, transcription factor footprints significantl
 
 In case we are not interested in the upstream and downstream nucleosome patterns, but would rather keep all nucleosome pattern fragments within the nucleosome group, we can do that using the option combineNucCounts=TRUE. 
 
-```{r}
+```{r,fig.height=2,fig.width=8}
 res <- diNOMeTest(NomeData,WTsamples = c("WT_1","WT_2"),
   KOsamples = c("AdnpKO_1","AdnpKO_2"),combineNucCounts = TRUE)
 footprint_percentages <- footprintPerc(NomeData,combineNucCounts = TRUE)
@@ -138,7 +138,7 @@ compareFootprints(footprint_percentages,res,WTsamples = c("WT_1","WT_2"),
 
 ### Session information
 
-```{r,fig.height=4,fig.width=8}
+```{r}
 sessionInfo()
 ```
 
