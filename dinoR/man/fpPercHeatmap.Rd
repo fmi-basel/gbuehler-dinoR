@@ -14,21 +14,21 @@ fpPercHeatmap(
 \item{footprint_percentages}{A tibble where each column corresponds to a sample-footprint percentage and each row to a ROI,
 with the rows clustered by similarity.}
 
-\item{breaks}{A list of vectors indicating numeric breaks used in ColorRamp2 to define heatmap color gradient,
-with one element per pattern.}
+\item{breaks}{A list of vectors indicating numeric breaks used in (\code{ColorRamp2}) to define the heatmap color gradient,
+with one element per pattern (usually 5, or 3 if the nucleosome patterns have been combined).}
 
 \item{plotcols}{A character vector of 5 colors to be used for the heatmaps of the 5 footprint
-patterns ("tf", "open", "upNuc", "Nuc", "downNuc").}
+patterns ("tf", "open", "upNuc", "Nuc", "downNuc"), or 3 colors if the nucleosome patterns have been combined.}
 }
 \value{
-Heatmaps of the percentages of all reads in a ROI-sample combination in each footprint pattern.
+Heatmaps of the percentages of all fragments in a ROI-sample combination in each footprint pattern.
 }
 \description{
-Draws heatmaps of the percentages of all reads in a ROI-sample combination in each footprint pattern.
+Draws heatmaps of the percentages of all fragments in a ROI-sample combination in each footprint pattern.
 }
 \details{
-Draws heatmaps of the percentages of all reads in a ROI-sample combination in each
-footprint pattern ("tf", "open", "upNuc", "Nuc", "downNuc"). The rows of the heatmaps are split by ROI group.
+Draws heatmaps of the percentages of all fragments in a ROI-sample combination in each
+footprint pattern supplied (for example: "tf", "open", "upNuc", "Nuc", "downNuc"). The rows of the heatmaps are split by ROI group.
 }
 \examples{
 NomeData <- createExampleData()

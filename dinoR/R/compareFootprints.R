@@ -3,13 +3,13 @@
 #' @description Compare each footprint pattern in WT and KO samples (percentages and diNOMeTest results).
 #'
 #' @details Plots the percentages of reads in each ROI in WT versus KO samples (mean of two replicates) in each
-#' footprint pattern ("tf", "open", "upNuc", "Nuc", "downNuc"). The color indicates the ROI group and the shape the results of the diNOMeTest.
+#' footprint pattern. The color indicates the ROI group and the shape the results of the diNOMeTest.
 #'
 #' @param footprint_percentages A tibble where each column corresponds to a sample-footprint percentage and each row to a ROI,
 #'  with the rows clustered by similarity.
 #' @param res A tibble with the results of differential fragment count testing for each ROI-footprint combination.
-#' @param WTsamples The control sample names (two replicates) as they appear in footprint_percentages.
-#' @param KOsamples The treatment sample names (two replicates) as they appear in footprint_percentages.
+#' @param WTsamples The control sample names.
+#' @param KOsamples The treatment sample names.
 #' @param plotcols A character vector of colors to be used for distinguishing the ROI groups (has to be the same length as there are ROI groups).
 #' @param facetROIgroup If TRUE, split the plots for each pattern by ROI group.
 #'

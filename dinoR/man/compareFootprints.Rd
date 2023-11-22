@@ -19,9 +19,9 @@ with the rows clustered by similarity.}
 
 \item{res}{A tibble with the results of differential fragment count testing for each ROI-footprint combination.}
 
-\item{WTsamples}{The control sample names (two replicates) as they appear in footprint_percentages.}
+\item{WTsamples}{The control sample names.}
 
-\item{KOsamples}{The treatment sample names (two replicates) as they appear in footprint_percentages.}
+\item{KOsamples}{The treatment sample names.}
 
 \item{plotcols}{A character vector of colors to be used for distinguishing the ROI groups (has to be the same length as there are ROI groups).}
 
@@ -35,7 +35,7 @@ Compare each footprint pattern in WT and KO samples (percentages and diNOMeTest 
 }
 \details{
 Plots the percentages of reads in each ROI in WT versus KO samples (mean of two replicates) in each
-footprint pattern ("tf", "open", "upNuc", "Nuc", "downNuc"). The color indicates the ROI group and the shape the results of the diNOMeTest.
+footprint pattern. The color indicates the ROI group and the shape the results of the diNOMeTest.
 }
 \examples{
 NomeData <- createExampleData()

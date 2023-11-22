@@ -1,21 +1,21 @@
 #' @title diNOMeTest
 #'
-#' @description Tests for differential fragment counts for each NOMe
-#'  footprint pattern compared to all patterns in two conditions.
+#' @description Tests for differences in fragment counts for each NOMe
+#'  footprint pattern compared to total fragment counts in two conditions.
 #'
 #' @details Uses edgeR's quasi-likelihood methods to conveniently test for differential proportions of each
-#'  one of 5 distinct footprints between at least two control and at least two treatment samples.
+#'  one of 5 (or 3, if nucleosome footprints are combined) distinct footprints between at least two control and at least two treatment samples.
 #'
 #' @param footprint_counts A Summarized Experiment containing the sample names (colData), ROI names (rowData),
 #' and number of fragments in each NOMe footprint pattern category (assays). For example
-#' the output of the footprintQuant function.
-#' @param WTsamples The control sample names as they appear in footprint_quantifications.
-#' @param KOsamples The treatment sample names as they appear in footprint_quantifications.
+#' the output of the (\code{footprintQuant}) function.
+#' @param WTsamples The control sample names as they appear in (\code{colData(footprint_counts)$samples}).
+#' @param KOsamples The treatment sample names as they appear in (\code{colData(footprint_counts)$samples}).
 #' @param minreads The minimum number of fragments to which a footprint could be assigned
 #'  a ROI must have in all samples. All other ROIs are filtered out before the differential NOMe analysis.
 #' @param meanreads The minimum number of fragments to which a footprint could be assigned
 #'  a ROI must on average across all samples. All other ROIs are filtered out before the differential NOMe analysis.
-#' @param prior.count The pseudocount used for edgeR::glmQLFit.
+#' @param prior.count The pseudocount used for (\code{edgeR::glmQLFit}).
 #' @param FDR The FDR cutoff for a ROI - footprint combination to be called regulated in the output.
 #' @param FC The fold change cutoff for a ROI - footprint combination to be called regulated in the output.
 #' @param combineNucCounts If TRUE, the upNuc, downNuc, and Nuc fragment counts will be combined into the Nuc category.

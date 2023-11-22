@@ -7,17 +7,18 @@
 footprintQuant(NomeData)
 }
 \arguments{
-\item{NomeData}{A Ranged Summarized Experiment with an entry for each ROI. The rowData should contain information about each ROI,
-including a ROIgroup.The assays should contain:nFragsAnalyzed, describing the number of fragments that were analyzed for each sample/ROI combination.
-reads, containg a Gpos object for each sample/ROI combination, with a position for each base in the ROI and two metadata columns: protection,
-a sparse matrix where TRUE stands for Cs protected from methylation, and methylation, where TRUE stands for methylated Cs.
+\item{NomeData}{A Ranged Summarized Experiment (RSE) with an entry for each ROI. The (\code{rowData}) should contain information about each ROI,
+including a ROIgroup.The (\code{assays}) should contain at least (\code{nFragsAnalyzed}) and (\code{reads}). (\code{nFragsAnalyzed}) describes the number of fragments
+that were analyzed for each sample/ROI combination. (\code{reads}) contains a Gpos object for each sample/ROI combination,
+with a position for each base in the ROI and two metadata columns (protection and methylation). protection is a sparse logical matrix where
+TRUE stands for Cs protected from methylation, and methylation is a sparse logical matrix where TRUE stands for methylated Cs.
 In addition, there must be an assay called "footprints", which contains the assigned footprint ("tf","open","upNuc","Nuc","downNuc") for each fragment
 (generated using the footprintCalc function).}
 }
 \value{
 The Ranged Summarized Experiment with an assay added for each footprint type,
 containing the number of fragments that contain that footprint. An assay with the total number
-of patternable fragments ("all") is also added.
+of pattern-able fragments ("all") is also added.
 tf = transcription factor footprint
 open = open chromatin footprint
 upNuc = upstream nucleosome footprint

@@ -19,11 +19,11 @@ diNOMeTest(
 \arguments{
 \item{footprint_counts}{A Summarized Experiment containing the sample names (colData), ROI names (rowData),
 and number of fragments in each NOMe footprint pattern category (assays). For example
-the output of the footprintQuant function.}
+the output of the (\code{footprintQuant}) function.}
 
-\item{WTsamples}{The control sample names as they appear in footprint_quantifications.}
+\item{WTsamples}{The control sample names as they appear in (\code{colData(footprint_counts)$samples}).}
 
-\item{KOsamples}{The treatment sample names as they appear in footprint_quantifications.}
+\item{KOsamples}{The treatment sample names as they appear in (\code{colData(footprint_counts)$samples}).}
 
 \item{minreads}{The minimum number of fragments to which a footprint could be assigned
 a ROI must have in all samples. All other ROIs are filtered out before the differential NOMe analysis.}
@@ -31,7 +31,7 @@ a ROI must have in all samples. All other ROIs are filtered out before the diffe
 \item{meanreads}{The minimum number of fragments to which a footprint could be assigned
 a ROI must on average across all samples. All other ROIs are filtered out before the differential NOMe analysis.}
 
-\item{prior.count}{The pseudocount used for edgeR::glmQLFit.}
+\item{prior.count}{The pseudocount used for (\code{edgeR::glmQLFit}).}
 
 \item{FDR}{The FDR cutoff for a ROI - footprint combination to be called regulated in the output.}
 
@@ -43,12 +43,12 @@ a ROI must on average across all samples. All other ROIs are filtered out before
 A tibble with the results of differential fragment count testing for each ROI-footprint combination.
 }
 \description{
-Tests for differential fragment counts for each NOMe
-footprint pattern compared to all patterns in two conditions.
+Tests for differences in fragment counts for each NOMe
+footprint pattern compared to total fragment counts in two conditions.
 }
 \details{
 Uses edgeR's quasi-likelihood methods to conveniently test for differential proportions of each
-one of 5 distinct footprints between at least two control and at least two treatment samples.
+one of 5 (or 3, if nucleosome footprints are combined) distinct footprints between at least two control and at least two treatment samples.
 }
 \examples{
 NomeData <- createExampleData()

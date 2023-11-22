@@ -27,19 +27,25 @@ suppressPackageStartupMessages({
   })
 ```
 
-### load the NomeMatrix data for 2 replicates Adnp_KO and WT
+### load the NOMe-seq data for Adnp Knock-Out and WT mosue ES cells (two replicates each)
 
-We use biscuit to map 300bp paired-end reads to the genome, umi_tools to remove duplicated UMIs, and the get_data_matrix_from_bams function from the nomeR package (E. Ozonov, unpublished) to get the protection from GCH methylation calls for each read pair (fragment) overlapping a region of interest (ROI). However, any tool that will result in GCH methylation protection calls can be used (for example QuasR), as long as the final data structure is as shown below. Note that we use protection from methylation calls (0 = methylated, 1 = not methylated). 
+We use biscuit (https://huishenlab.github.io/biscuit/) to map 300bp paired-end reads to the genome, UMI-tools (https://github.com/CGATOxford/UMI-tools) to remove duplicated UMIs, and the fetch-NOMe package (https://github.com/fmi-basel/gpeters-fetchNOMe) to get the protection from GCH methylation calls for each read pair (fragment) overlapping a region of interest (ROI).  Note that we use protection from methylation calls (0 = methylated, 1 = not methylated). We then use the R package NOMeConverteR (https://github.com/fmi-basel/gbuehler-NOMeConverteR) to convert the resulting tibble into a ranged summarized experiment object, as shown below. 
 
 ```{r load data}
 NomeData <- readRDS(system.file("extdata", "NOMeSeqData.rds", package = "dinoR"))
 NomeData
 ```
 
+The reads assay contains GPos objects with the GCH methylation data in two sparse logical matrices, one for protection from methylation , and one for methylation.
+
+```{r}
+assays(NomeData)[["reads"]][1,1]
+```
+
 ### meta plots across ROIs with common TF motifs in the center
 
-We generate metaplots, grouping our ROIs into those that have  Rest, Ctcf, or Adnp motif sites in their center.
-We use 2 samples from WT mouse ES cells,a nd two samples from Adnp KO mouse ES cells.
+We generate metaplots, grouping our ROIs into those that have  Rest, Ctcf, or Adnp motifs in their center.
+We use 2 samples from WT mouse ES cells, and two samples from Adnp KO mouse ES cells.
 
 ```{r,fig.height=6,fig.width=8}
 avePlotData <- metaPlots(NomeData=NomeData,nr=10,ROIgroup = "motif")
@@ -52,7 +58,7 @@ ggplot(avePlotData, aes(x=position,y=protection)) + geom_point(alpha=0.5) +
                                 alpha=0.5,color="grey",linetype="dashed")
 ```
 
-We can already see that while the NOMe footprints around Rest and Ctcf motifs don't change, there are clear differences around the Adnp motifs.
+We can already see that while the NOMe footprints around Rest and Ctcf motifs don't change, there are clear differences between WT and Adnp KO cells around the Adnp motifs.
 
 To quantify these differences, we can now classify each fragment according to five types of footprints: transcription factor bound (TF), open chromatin, and nucleosome (we distinguish also upstream nucleosome (upNuc), downstream nucleosome (downNuc), and all other nucleosome (Nuc) footprints). To do this we use three windows (-50:-25, -8:8, 25:50) around the ROI center. Then we count the number of fragments in each sample-ROI combination supporting each footprint category. 
 
@@ -61,16 +67,16 @@ To quantify these differences, we can now classify each fragment according to fi
 ```{r read counts}
 NomeData <- footprintCalc(NomeData)
 NomeData <- footprintQuant(NomeData)
-#remove any rows where no reads could be assigned a footprint
-#footprint_counts <- footprint_counts[rowSums(footprint_counts[,3:7]) > 0,]
 NomeData
 ```
 
-Note that if a fragment does not have methylation protection data in all three windows needed for classification, the fragment will be counted as noData. 
+Note that if a fragment does not have methylation protection data in all three windows needed for classification, the fragment will not be used. 
 
 Next we can test for differential abundance of footprints between Adnp KO and WT samples.
 
 ### calculate differential NOMe-seq footprint abundance between Adnp KO and WT 
+
+We use edgeR to check for differences in abundance between wild type and Adnp KO samples for each footprint type fragment count compared to the total fragment counts. Library sizes for TMM normalization are calculated on the total fragment counts. 
 
 ```{r diNOMe}
 res <- diNOMeTest(NomeData,WTsamples = c("WT_1","WT_2"),
@@ -78,7 +84,7 @@ res <- diNOMeTest(NomeData,WTsamples = c("WT_1","WT_2"),
 res
 ```
 
-#### plot the number of regulated ROIs within each ROI type
+We can then simply plot the number of regulated ROIs within each ROI type...
 
 ```{r nregulated, fig.height=4,fig.width=7}
 
@@ -90,7 +96,7 @@ res %>% group_by(contrasts,motif,regulated) %>% summarize(n=n()) %>%
 ```
 
 
-#### MA plots
+...or display the results in MA plots.
 
 ```{r MAplot,fig.height=2,fig.width=10}
 ggplot(res,aes(y=logFC,x=logCPM,col=regulated)) + geom_point() + 
@@ -98,19 +104,14 @@ ggplot(res,aes(y=logFC,x=logCPM,col=regulated)) + geom_point() +
   scale_color_manual(values=c("orange","grey","blue3"))
 ```
 
-### calculate the percentage of fragments in each footprint type and plot a heatmap comparing percentages in WT and KO
+### calculate the percentage of fragments in each footprint type and plot a (clustered) heatmap comparing percentages in WT and Adnp KO
 
 ```{r percentages,fig.height=5,fig.width=7}
 footprint_percentages <- footprintPerc(NomeData)
-
-#plot heatmaps 
 fpPercHeatmap(footprint_percentages)
-
-
-
 ```
 
-### compare the footprint percentages and significance testing results for KO and WT 
+### compare the footprint percentages and significance testing results for Adnp KO and WT 
 
 ```{r comparison,fig.height=4,fig.width=8}
 
@@ -121,6 +122,7 @@ compareFootprints(footprint_percentages,res,WTsamples = c("WT_1","WT_2"),
 
 We can see that in Adnp KO samples, transcription factor footprints significantly increase around Adnp motifs, while nucleosome footprints decrease. 
 
+### Combining the nucleosome pattenrs
 
 In case we are not interested in the upstream and downstream nucleosome patterns, but would rather keep all nucleosome pattern fragments within the nucleosome group, we can do that using the option combineNucCounts=TRUE. 
 

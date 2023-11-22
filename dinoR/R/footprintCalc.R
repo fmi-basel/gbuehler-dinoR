@@ -1,17 +1,18 @@
-#' @title footprintQuant
+#' @title footprintCalc
 #'
-#' @description Assign a footprint type to each fragment based on GpC protection values in pre-defined windows.
+#' @description Assign a footprint type to each fragment based on GCH protection values in pre-defined windows.
 #'
-#' @details Selects 3 windows (default is -50:-25, -8:8, 25:50) around the center of the provided region of interest (ROI) and calculates the average GpC
-#' methylation protection for a given fragment across all GpCs in each window.
-#' If it is above 0.5 the window is deemed protected, below 0.5, unprotected Depending on the protection pattern
+#' @details Selects 3 windows (default is -50:-25, -8:8, 25:50) around the center of the provided region of interest (ROI) and calculates the average GCH
+#' methylation protection for a given fragment across all GCHs in each window.
+#' If it is above 0.5 the window is deemed protected, below 0.5, unprotected. Depending on the protection pattern
 #' in all windows, a read is put into one of 5 footprint categories: tf bound (0 - 1 - 0), open chromatin (0 - 0 - 0),
 #' upstream nucleosome (1 - 1 - 0), other nucleosome (1 - 1 - 1, 1 - 0 - 0, 0 - 0 - 1, 1 - 0 - 1), and downstream nucleosome (0 - 1 - 1).
 #'
-#' @param NomeData A Ranged Summarized Experiment with an entry for each ROI. The rowData should contain information about each ROI,
-#' including a ROIgroup.The assays should contain:nFragsAnalyzed, describing the number of fragments that were analyzed for each sample/ROI combination.
-#' reads, containg a Gpos object for each sample/ROI combination, with a position for each base in the ROI and two metadata columns: protection,
-#' a sparse matrix where TRUE stands for Cs protected from methylation, and methylation, where TRUE stands for methylated Cs.
+#' @param NomeData A Ranged Summarized Experiment (RSE) with an entry for each ROI. The (\code{rowData}) should contain information about each ROI,
+#' including a ROIgroup.The (\code{assays}) should contain at least (\code{nFragsAnalyzed}) and (\code{reads}). (\code{nFragsAnalyzed}) describes the number of fragments
+#' that were analyzed for each sample/ROI combination. (\code{reads}) contains a Gpos object for each sample/ROI combination,
+#' with a position for each base in the ROI and two metadata columns (protection and methylation). protection is a sparse logical matrix where
+#' TRUE stands for Cs protected from methylation, and methylation is a sparse logical matrix where TRUE stands for methylated Cs.
 #' @param window_1 Integer vector with two elements representing start and end positions
 #' of the first window relative to the ROI center.
 #' @param window_2 Integer vector with two elements representing start and end positions
