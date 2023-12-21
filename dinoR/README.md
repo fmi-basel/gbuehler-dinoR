@@ -124,7 +124,7 @@ the number of fragments in each sample-ROI combination supporting each
 footprint category.
 
 <figure>
-<img src="NOMe_patterns.png" alt="NOMe patterns" />
+<img src="vignettes/NOMe_patterns.png" alt="NOMe patterns" />
 <figcaption aria-hidden="true">NOMe patterns</figcaption>
 </figure>
 

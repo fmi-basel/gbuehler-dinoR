@@ -77,7 +77,7 @@ We can already see that while the NOMe footprints around Rest and Ctcf bound mot
 
 To quantify the differences visible in above meta plots, we adopted and slightly modified the approch of Sönmezer et al., 2021. We classify each fragment according to five types of footprints: transcription factor bound (TF), open chromatin, and nucleosome (we distinguish also upstream positioned nucleosome (upNuc), downstream positioned nucleosome (downNuc), and all other nucleosome (Nuc) footprints). To do this we use three windows (-50:-25, -8:8, 25:50) around the motif center (which should correspond to the ROI center of the provided ROIs). Then we count the number of fragments in each sample-ROI combination supporting each footprint category. 
 
-![NOMe patterns](NOMe_patterns.png)
+![NOMe patterns](vignettes/NOMe_patterns.png)
 
 
 ```{r read counts}
