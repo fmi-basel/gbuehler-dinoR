@@ -6,7 +6,7 @@
 #' methylation protection for a given fragment across all GCHs in each window.
 #' If it is above 0.5 the window is deemed protected, below 0.5, unprotected. Depending on the protection pattern
 #' in all windows, a read is put into one of 5 footprint categories: tf bound (0 - 1 - 0), open chromatin (0 - 0 - 0),
-#' upstream nucleosome (1 - 1 - 0), other nucleosome (1 - 1 - 1, 1 - 0 - 0, 0 - 0 - 1, 1 - 0 - 1), and downstream nucleosome (0 - 1 - 1).
+#' downstream positioned nucleosome (1 - 1 - 0), other nucleosome (1 - 1 - 1, 1 - 0 - 0, 0 - 0 - 1, 1 - 0 - 1), and upstream positioned nucleosome (0 - 1 - 1).
 #'
 #' @param NomeData A Ranged Summarized Experiment (RSE) with an entry for each ROI. The (\code{rowData}) should contain information about each ROI,
 #' including a ROIgroup.The (\code{assays}) should contain at least (\code{nFragsAnalyzed}) and (\code{reads}). (\code{nFragsAnalyzed}) describes the number of fragments
@@ -101,9 +101,9 @@ footprintCalc <- function(NomeData,window_1=c(-50,-25),window_2=c(-8,8),window_3
   pattern <- ifelse(Win1==0 & Win2==1 & Win3==0, "tf",
                     ifelse(Win1==0 & Win2==0 & Win3==0, "open",
                            ifelse(Win1==1 & Win2==0 & Win3==0, "Nuc",
-                                  ifelse(Win1==1 & Win2==1 & Win3==0, "upNuc",
+                                  ifelse(Win1==1 & Win2==1 & Win3==0, "downNuc",
                                          ifelse(Win1==1 & Win2==1 & Win3==1, "Nuc",
-                                                ifelse(Win1==0 & Win2==1 & Win3==1, "downNuc",
+                                                ifelse(Win1==0 & Win2==1 & Win3==1, "upNuc",
                                                        ifelse(Win1==0 & Win2==0 & Win3==1, "Nuc",
                                                               ifelse(Win1==1 & Win2==0 & Win3==1, "Nuc",
                                                                      NA))))))))

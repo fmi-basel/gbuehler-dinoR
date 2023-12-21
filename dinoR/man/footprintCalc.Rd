@@ -38,7 +38,7 @@ Selects 3 windows (default is -50:-25, -8:8, 25:50) around the center of the pro
 methylation protection for a given fragment across all GCHs in each window.
 If it is above 0.5 the window is deemed protected, below 0.5, unprotected. Depending on the protection pattern
 in all windows, a read is put into one of 5 footprint categories: tf bound (0 - 1 - 0), open chromatin (0 - 0 - 0),
-upstream nucleosome (1 - 1 - 0), other nucleosome (1 - 1 - 1, 1 - 0 - 0, 0 - 0 - 1, 1 - 0 - 1), and downstream nucleosome (0 - 1 - 1).
+downstream positioned nucleosome (1 - 1 - 0), other nucleosome (1 - 1 - 1, 1 - 0 - 0, 0 - 0 - 1, 1 - 0 - 1), and upstream positioned nucleosome (0 - 1 - 1).
 }
 \examples{
 NomeData <- createExampleData()
