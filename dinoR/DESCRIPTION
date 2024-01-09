@@ -2,7 +2,7 @@ Package: dinoR
 Title: Differential NOMe-seq analysis
 Version: 0.99.0
 Authors@R: 
-    person("Michaela", "Schwaiger", , "michaela.schwaiger@fmi.ch", role = c("aut", "cre"),
+    person("Michaela", "Schwaiger",, "michaela.schwaiger@fmi.ch", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-4522-7810"))
 Description: dinoR can test for significant differences in NOME-seq
     footprints between two conditions, 

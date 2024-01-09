@@ -1,24 +1,22 @@
+library(tibble)
 
+#test that it works with random example data
 NomeData <- createExampleData()
-
-
 test_that("metaPlots works", {
   expect_no_error(metaPlots(NomeData,span=0.08))
 })
 
-# NomeMatrix <- tibble(SampleName = c(rep("WT",10)),
-#                      names=rep(paste0("ROI",1:10),1),nFragsAnalyzed=rep(20,10),
-#                      GCH_DataMatrix=rep(list(matrix(rep(c(NA,0,1,1,NA,NA,NA,0,0,
-#                                                           1,NA,1,1,NA,1,NA,0,0,1,NA),
-#                                                         40),ncol=40,nrow=20,byrow=FALSE)),10))
-# plotData <- metaPlots(NomeMatrix,span=0.2)
-# plotData$protection <- round(plotData$protection)
-# plotData$loess <- round(plotData$loess)
-# output <- tibble(position = -19:20,type=rep("motif1",40),
-#                  protection=rep(58,40),loess=rep(58,40),
-#                  sample=rep("WT",40))
-#
-# test_that("metaPlots returns the correct output", {
-#   expect_equal(plotData,output)
-# })
+#test that the output is as expected when using default example data
+NomeData <- createExampleData(samples=c("WT_1"),group=c("WT"),nROI=10,randomMeth=FALSE)
+plotData <- metaPlots(NomeData,span=0.2)
+plotData$protection <- round(plotData$protection)
+plotData$loess <- round(plotData$loess)
+
+output <- tibble(position = -150:150,type=rep("motif1",301),
+                 protection=rep(46,301),loess=rep(46,301),
+                  sample=rep("WT_1",301))
+
+test_that("metaPlots returns the correct output", {
+   expect_equal(plotData,output)
+ })
 

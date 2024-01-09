@@ -7,7 +7,8 @@
 createExampleData(
   samples = c("WT_1", "WT_2", "KO_1", "KO_2"),
   group = c("WT", "WT", "KO", "KO"),
-  nROI = 20
+  nROI = 20,
+  randomMeth = TRUE
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ createExampleData(
 \item{group}{The sample group names.}
 
 \item{nROI}{The number of ROIs that should be constructed.}
+
+\item{randomMeth}{Logical indicating whether the methylation/protection values should be randomly generated.}
 }
 \value{
 RSE object with mock data.

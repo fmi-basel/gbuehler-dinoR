@@ -7,6 +7,7 @@
 #' @param samples The sample names.
 #' @param group The sample group names.
 #' @param nROI The number of ROIs that should be constructed.
+#' @param randomMeth Logical indicating whether the methylation/protection values should be randomly generated.
 #'
 #' @return RSE object with mock data.
 #'
@@ -18,7 +19,7 @@
 #' @importFrom Matrix Matrix
 #'
 #' @export
-createExampleData <- function(samples=c("WT_1","WT_2","KO_1","KO_2"),group=c("WT","WT","KO","KO"),nROI=20){
+createExampleData <- function(samples=c("WT_1","WT_2","KO_1","KO_2"),group=c("WT","WT","KO","KO"),nROI=20,randomMeth=TRUE){
 
 #construct a Ranged Summarized Experiment containing the NOMeseq data
 #sample annotations (colData)
@@ -54,10 +55,18 @@ for(s in seq_along(annots$samples)){
     gpos1 <- GPos(seqnames=seqnames(ROIs_gr)[r], pos=start(ROIs_gr)[r]:end(ROIs_gr)[r],
                   strand=strand(ROIs_gr)[r],
                   seqinfo=NULL, seqlengths=NULL, stitch=NA)
-    gpos1$protection <- Matrix(matrix(sample(c(TRUE,FALSE),size=301*20,
+
+    if(randomMeth == TRUE){ #randomly generate the TRUE FALSE values for the sparse matrices
+           gpos1$protection <- Matrix(matrix(sample(c(TRUE,FALSE),size=301*20,
                                              replace=TRUE),nrow=301,ncol=20),sparse=TRUE)
-    gpos1$methylation <- Matrix(matrix(sample(c(TRUE,FALSE),size=301*20,
+           gpos1$methylation <- Matrix(matrix(sample(c(TRUE,FALSE),size=301*20,
                                               replace=TRUE),nrow=301,ncol=20),sparse=TRUE)
+    } else { # keep the TRUE FALSE values constant (for testing)
+           meth <- rep(c(TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE),301)
+           prot <- rep(c(FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE),301)
+           gpos1$protection <- Matrix(matrix(prot,nrow=301,ncol=20),sparse=TRUE)
+           gpos1$methylation <- Matrix(matrix(meth,nrow=301,ncol=20),sparse=TRUE)
+    }
     gr_list1[[r]] <- gpos1
   }
   names(gr_list1) <- names(ROIs_gr)
