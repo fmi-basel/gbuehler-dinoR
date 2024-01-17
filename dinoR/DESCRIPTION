@@ -51,4 +51,5 @@ biocViews:
     DifferentialMethylation,
     Coverage,
     Transcription,
+    Sequencing,
     Software
